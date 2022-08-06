@@ -147,6 +147,7 @@ if [ $# -gt 3 ]; then
   fi
 fi
 
+
 #for f in $( find "${MAVEN_REPO}/org/slf4j/" -name "*1.5.6*" );
 #do
 #  echo "Removing $f"
@@ -276,7 +277,7 @@ do
 
     export "CUDA_VISIBLE_DEVICES=$GPUs_to_use"
 
-    exp_cmd="moa.DoTask \"EvaluateInterleavedTestThenTrain1 -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
+    exp_cmd="moa.DoTask \"EvaluateInterleavedTestThenTrain -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
     echo -e "$JCMD -classpath $CLASSPATH -Xmx32g -Xms50m -Xss1g -javaagent:$JAVA_AGENT_PATH"
     echo -e "\n$exp_cmd\n"
     echo -e "\n$exp_cmd\n" > $tmp_log_file
@@ -285,7 +286,7 @@ do
     -classpath "$CLASSPATH" \
     -Xmx32g -Xms50m -Xss1g \
     -javaagent:"$JAVA_AGENT_PATH" \
-    moa.DoTask "EvaluateInterleavedTestThenTrain1 -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
+    moa.DoTask "EvaluateInterleavedTestThenTrain -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
 
     if [ -z $! ]; then
       task_failed=1
