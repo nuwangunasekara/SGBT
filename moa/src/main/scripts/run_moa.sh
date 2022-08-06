@@ -24,6 +24,7 @@ dataset=(spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.s
 dataset=(elecNormNew)
 dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
 dataset=(RandomTreeGenerator RandomRBF)
+dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
@@ -105,7 +106,13 @@ learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
 # ADL Votes reader
 # learners=('neuralNetworks.ADLVotesReader')
 
-sample_frequency=1000000
+# SGT
+learners=('trees.StreamingGradientTreePredictor -D 0.1 -W 1')
+
+# Boosting
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32 -W 1)')
+
+sample_frequency=1000
 use_10_percent_sample_frequency=0
 max_instances=1000000
 #####################################################################################################
