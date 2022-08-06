@@ -8,6 +8,8 @@ import com.henrygouk.sgt.*;
 import com.yahoo.labs.samoa.instances.Attribute;
 import com.yahoo.labs.samoa.instances.Instance;
 
+import moa.capabilities.Capability;
+import moa.capabilities.ImmutableCapabilities;
 import moa.classifiers.AbstractClassifier;
 import moa.classifiers.MultiClassClassifier;
 import moa.classifiers.Regressor;
@@ -74,6 +76,64 @@ public class StreamingGradientTreePredictor extends AbstractClassifier implement
         return new StreamingGradientTreeCommittee(featureInfo, options, numOutputs);
     }
 
+    public void trainOnInstanceImpl(Instance inst, GradHess[] gradHess, double[] raw /* only for semiSupervisedOption */) {
+        mInstances++;
+
+        if(mInstances <= warmStart.getValue()) {
+            mDiscretizer.observe(inst);
+            return;
+        }
+
+        Attribute target = inst.classAttribute();
+
+        if(mTrees == null) {
+            FeatureInfo[] featureInfo = mDiscretizer.getFeatureInfo();
+            StreamingGradientTreeOptions options = new StreamingGradientTreeOptions();
+            options.delta = delta.getValue();
+            options.gracePeriod = gracePeriod.getValue();
+            options.lambda = lambda.getValue();
+            options.gamma = gamma.getValue();
+
+            if(target.isNominal()) {
+                mTrees = createTrees(featureInfo, options, target.numValues() - 1);
+//                mObjective = new SoftmaxCrossEntropy();
+            }
+            else {
+                mTrees = createTrees(featureInfo, options, 1);
+//                mObjective = new SquaredError();
+            }
+        }
+
+        int[] features = mDiscretizer.getFeatures(inst);
+        double[] groundTruth;
+//        double[] raw = mTrees.predict(features);
+
+        if(target.isNominal()) {
+            if(!inst.classIsMissing()) {
+                groundTruth = new double[target.numValues()];
+                groundTruth[(int)inst.classValue()] = 1.0;
+            }
+            else if(semiSupervisedOption.getValue() > 0.0) {
+                //This is equivalent to entropy minimisation when mObjective is the SoftmaxCrossEntropy objective
+                groundTruth = mObjective.transfer(raw);
+
+                for(int j = 0; j < groundTruth.length; j++) {
+                    groundTruth[j] *= semiSupervisedOption.getValue();
+                }
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            groundTruth = new double[] {inst.classValue()};
+        }
+
+//        GradHess[] gradHess = mObjective.computeDerivatives(groundTruth, raw);
+        mTrees.update(features, gradHess);
+    }
+
+
     public void trainOnInstanceImpl(Instance inst) {
         mInstances++;
 
@@ -131,19 +191,29 @@ public class StreamingGradientTreePredictor extends AbstractClassifier implement
         mTrees.update(features, gradHess);
     }
 
-    public double[] getVotesForInstance(Instance inst) {
+    static public double[] getScoresWhenNullTree(Instance inst, boolean reduceNumberOfPredictionsByOne){
+        if(inst.classAttribute().isNominal()) {
+            return new double[reduceNumberOfPredictionsByOne ? inst.classAttribute().numValues() -1 : inst.classAttribute().numValues()];
+        }
+        else {
+            return new double[1];
+        }
+    }
+
+    public double[] getScoresForInstance(Instance inst) {
         if(mTrees == null) {
-            if(inst.classAttribute().isNominal()) {
-                return new double[inst.classAttribute().numValues()];
-            }
-            else {
-                return new double[1];
-            }
+            return getScoresWhenNullTree(inst, true);
         }
 
         int[] features = mDiscretizer.getFeatures(inst);
-        double[] raw = mTrees.predict(features);
+        return mTrees.predict(features);
+    }
 
+    public double[] getVotesForInstance(Instance inst) {
+        if(mTrees == null) {
+            return getScoresWhenNullTree(inst, false);
+        }
+        double[] raw = getScoresForInstance(inst);
         return mObjective.transfer(raw);
     }
 
@@ -173,5 +243,13 @@ public class StreamingGradientTreePredictor extends AbstractClassifier implement
                 new Measurement("node updates", updates),
                 new Measurement("max depth", maxDepth)
         };
+    }
+
+    @Override
+    public ImmutableCapabilities defineImmutableCapabilities() {
+        if (this.getClass() == StreamingGradientTreePredictor.class)
+            return new ImmutableCapabilities(Capability.VIEW_STANDARD, Capability.VIEW_LITE);
+        else
+            return new ImmutableCapabilities(Capability.VIEW_STANDARD);
     }
 }
