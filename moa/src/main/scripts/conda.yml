@@ -1,0 +1,8 @@
+channels:
+  - nvidia
+  - pytorch
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - maven
