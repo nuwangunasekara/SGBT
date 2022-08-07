@@ -115,6 +115,8 @@ learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredicto
 
 # gamma
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32 -W 1)')
+# ensemble size
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 3' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 6' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 9' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 12')
 
 sample_frequency=1000
 use_10_percent_sample_frequency=0
