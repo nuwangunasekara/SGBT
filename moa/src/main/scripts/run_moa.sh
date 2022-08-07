@@ -110,7 +110,11 @@ learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
 learners=('trees.StreamingGradientTreePredictor -D 0.1 -W 1')
 
 # Boosting
-learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32 -W 1)')
+# delta
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.01 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.001 -W 1)')
+
+# gamma
+#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32 -W 1)')
 
 sample_frequency=1000
 use_10_percent_sample_frequency=0
