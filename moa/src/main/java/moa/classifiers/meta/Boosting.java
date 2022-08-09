@@ -19,6 +19,7 @@
  */
 package moa.classifiers.meta;
 
+import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.FloatOption;
 import com.github.javacliparser.IntOption;
 import com.henrygouk.sgt.GradHess;
@@ -34,10 +35,13 @@ import moa.capabilities.ImmutableCapabilities;
 import moa.classifiers.AbstractClassifier;
 import moa.classifiers.Classifier;
 import moa.classifiers.MultiClassClassifier;
+import moa.classifiers.core.driftdetection.ADWIN;
+import moa.classifiers.core.driftdetection.ChangeDetector;
 import moa.classifiers.trees.StreamingGradientTreePredictor;
 import moa.core.DoubleVector;
 import moa.core.Measurement;
 import moa.core.ObjectRepository;
+import moa.core.Utils;
 import moa.options.ClassOption;
 import moa.tasks.TaskMonitor;
 
@@ -55,7 +59,7 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
     }
 
     public ClassOption baseLearnerOption = new ClassOption("baseLearner", 'l',
-            "Classifier to train on instances.", Classifier.class, "trees.StreamingGradientTreePredictor -G 200 -W 1");
+            "Classifier to train on instances.", Classifier.class, "trees.StreamingGradientTreePredictor");
 //    trees.StreamingGradientTreePredictor -G 10 -W 1
 //    trees.FIMTDD
 
@@ -68,6 +72,11 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
     public IntOption subspaceSizeOption = new IntOption("subspaceSize", 'm',
             "# attributes per subset for each classifier. Negative values = totalAttributes - #attributes", 100, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
+    public FlagOption resetEnsemble = new FlagOption("resetEnsemble", 'r', "Reset ensemble");
+
+    public ClassOption driftDetectionMethodOption = new ClassOption("driftDetectionMethod", 'x',
+            "Change detector for drifts and its parameters", ChangeDetector.class, "ADWINChangeDetector -a 1.0E-6");
+
     protected ArrayList<StreamingGradientTreePredictor> ensemble;
 
     protected Classifier baseLearner;
@@ -76,6 +85,26 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
     protected ArrayList<ArrayList<Integer>> subSpacesForEnsemble;
     protected Objective mObjective;
 
+    protected double[] lastPrediction = null;
+    protected ChangeDetector driftDetectionMethod = null;
+    @Override
+    public void resetLearningImpl() {
+        System.out.println("Re-setting ensemble.");
+        if(this.ensemble != null){
+            while (this.ensemble.size() > 0) {
+                this.ensemble.remove(0);
+            }
+            this.ensemble = null;
+        }
+        if(this.subSpacesForEnsemble != null){
+            while (this.subSpacesForEnsemble.size() > 0) {
+                this.subSpacesForEnsemble.remove(0);
+            }
+            this.subSpacesForEnsemble = null;
+        }
+        this.mObjective = null;
+        this.driftDetectionMethod = null;
+    }
     @Override
     public void prepareForUseImpl(TaskMonitor monitor,
             ObjectRepository repository) {
@@ -97,12 +126,6 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         super.prepareForUseImpl(monitor, repository);
     }
 
-    @Override
-    public void resetLearningImpl() {
-//        for (int i = 0; i < this.ensemble.length; i++) {
-//            this.ensemble[i].resetLearning();
-//        }
-    }
     public Instance getSubInstance(Instance instance, double weight, ArrayList<Integer> featuresIndexes){
         Instances subset;
         ArrayList<Attribute> attSub = new ArrayList<>();
@@ -137,7 +160,7 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
     }
 
     public void initEnsemble(Instance inst){
-        //re-init, could go into a new function
+        System.out.println("Initializing ensemble.");
         Attribute target = inst.classAttribute();
         if(target.isNominal()) {
             mObjective = new SoftmaxCrossEntropy();
@@ -156,6 +179,7 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
             ensemble.add((StreamingGradientTreePredictor) baseLearner.copy());
         }
 
+        this.driftDetectionMethod = ((ChangeDetector) getPreparedClassOption(this.driftDetectionMethodOption)).copy();
 
         // #1 Select the size of k, it depends on 2 parameters (subspaceSizeOption and subspaceModeOption).
         int k = this.subspaceSizeOption.getValue();
@@ -206,6 +230,7 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         for (int i=0; i < ensembleSize.getValue(); i++){
             subSpacesForEnsemble.add(this.subspaces.get(subSpaceIndexes[i]));
         }
+        System.out.println("Ensemble size: "+ ensemble.size() + " subSpacesForEnsemble size:" + subSpacesForEnsemble.size());
     }
 
     public void trainBoosterUsingSquareLoss(Instance inst, boolean trainF0){
@@ -244,6 +269,18 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
 
     @Override
     public void trainOnInstanceImpl(Instance inst) {
+        double previousAccEstimation = driftDetectionMethod.getEstimation();
+        driftDetectionMethod.input(correctlyClassifies(inst) ? 0 : 1);
+        if (driftDetectionMethod.getChange() && (driftDetectionMethod.getEstimation() < previousAccEstimation)){
+            System.out.println("Drift detected.");
+            if (resetEnsemble.isSet()) {
+                this.resetLearningImpl();
+//              driftDetectionMethod = new ADWIN(1.0E-5);
+            }
+        }
+        if (ensemble == null) {
+            initEnsemble(inst);
+        }
         trainBoosterUsingOtherLoss(inst);
     }
 
@@ -274,11 +311,18 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         return mObjective.transfer(getRawScoreForInstanceOtherLoss(inst).getArrayCopy());
     }
 
+    @Override
+    public boolean correctlyClassifies(Instance inst) {
+//        Assumes test then train evaluation set up
+        return Utils.maxIndex(lastPrediction) == (int) inst.classValue();
+    }
+
     public double[] getVotesForInstance(Instance inst) {
         if (ensemble == null) {
             initEnsemble(inst);
         }
-        return getVotesForInstanceOtherLoss(inst);
+        lastPrediction = getVotesForInstanceOtherLoss(inst);
+        return lastPrediction;
     }
 
     @Override
