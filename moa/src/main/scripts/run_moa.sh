@@ -24,7 +24,7 @@ dataset=(spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.s
 dataset=(elecNormNew)
 dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
 dataset=(RandomTreeGenerator RandomRBF)
-dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF)
+dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF LED)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
@@ -107,18 +107,21 @@ learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
 # learners=('neuralNetworks.ADLVotesReader')
 
 # SGT
-learners=('trees.StreamingGradientTreePredictor -D 0.1 -W 1')
+learners=('trees.StreamingGradientTreePredictor')
 
 # Boosting
 # delta
-learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.01 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.001 -W 1)')
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.01)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.001)')
 
 # gamma
-#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16 -W 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32 -W 1)')
+#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32)')
 # ensemble size
-learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 3' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 6' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 9' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1 -W 1) -s 12')
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30')
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.1')
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.01')
+learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.001')
 
-sample_frequency=1000
+sample_frequency=1000000
 use_10_percent_sample_frequency=0
 max_instances=1000000
 #####################################################################################################
