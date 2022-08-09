@@ -121,7 +121,11 @@ learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredicto
 learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.01')
 learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.001')
 
-sample_frequency=1000000
+
+#evaluation_type='EvaluateInterleavedTestThenTrain'
+evaluation_type='EvaluatePrequential'
+
+sample_frequency=1000
 use_10_percent_sample_frequency=0
 max_instances=1000000
 #####################################################################################################
@@ -286,7 +290,7 @@ do
 
     export "CUDA_VISIBLE_DEVICES=$GPUs_to_use"
 
-    exp_cmd="moa.DoTask \"EvaluateInterleavedTestThenTrain -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
+    exp_cmd="moa.DoTask \"$evaluation_type -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
     echo -e "$JCMD -classpath $CLASSPATH -Xmx32g -Xms50m -Xss1g -javaagent:$JAVA_AGENT_PATH"
     echo -e "\n$exp_cmd\n"
     echo -e "\n$exp_cmd\n" > $tmp_log_file
@@ -295,7 +299,7 @@ do
     -classpath "$CLASSPATH" \
     -Xmx32g -Xms50m -Xss1g \
     -javaagent:"$JAVA_AGENT_PATH" \
-    moa.DoTask "EvaluateInterleavedTestThenTrain -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
+    moa.DoTask "$evaluation_type -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
 
     if [ -z $! ]; then
       task_failed=1
