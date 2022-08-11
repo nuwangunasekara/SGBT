@@ -24,7 +24,7 @@ dataset=(spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.s
 dataset=(elecNormNew)
 dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
 dataset=(RandomTreeGenerator RandomRBF)
-dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF LED)
+dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF LED AGR_a)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
@@ -34,26 +34,17 @@ random_seed=9
 # times to re-run on failure
 max_re_run_count=0
 
-learners=('neuralNetworks.MultiMLP -h -n -t UseThreads -o 2 -O 8 -N 9' 'meta.StreamingRandomPatches1 -s 10' 'meta.AdaptiveRandomForest1 -s 10 -j 10' )
-learners=('neuralNetworks.MultiMLP -h -n -t UseThreads -o 8 -O 8 -N 9 -R' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 8 -O 8 -N 9' 'meta.StreamingRandomPatches1 -s 10' 'meta.AdaptiveRandomForest1 -s 10 -j 10' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 2 -O 8 -N 9' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 2 -O 8 -N 11')
-learners=('meta.AdaptiveRandomForest1 -s 10 -j 10' 'meta.StreamingRandomPatches1 -s 10' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 8 -O 8 -N 9 -b 0.0' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 8 -O 8 -N 9 -b 0.6')
-learners=('neuralNetworks.MultiMLP -h -n -t UseThreads -o 10 -O 10 -b 0.0 -R' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 10 -O 10 -b 0.6 -R' 'meta.AdaptiveRandomForest1 -s 10 -j 10' 'meta.StreamingRandomPatches1 -s 10')
-learners=('neuralNetworks.MultiMLP -h -n -t UseThreads -o 10 -O 10 -b 0.0 -R -P P10' 'neuralNetworks.MultiMLP -h -n -t UseThreads -o 10 -O 10 -b 0.6 -R -P P10' 'meta.AdaptiveRandomForest1 -s 10 -j 10 -m 10' 'meta.StreamingRandomPatches1 -s 10 -m 10')
-learners=('neuralNetworks.ReadVotes')
-learners=('meta.AdaptiveRandomForest1 -s 10 -j 10 -m 60 -c minLoss' 'meta.StreamingRandomPatches1 -s 10 -m 60 -c minLoss' 'meta.AdaptiveRandomForest1 -s 30 -j 30 -m 10 -c minLoss' 'meta.StreamingRandomPatches1 -s 30 -m 10 -c minLoss')
-learners=('neuralNetworks.MLP -r 0.00005 -o ADAM -h -n -N 9 -B 1' 'neuralNetworks.MLP -r 0.00005 -o ADAM -h -n -N 9 -B 4' 'neuralNetworks.MLP -r 0.00005 -o ADAM -h -n -N 9 -B 50' 'neuralNetworks.MLP -r 0.00005 -o ADAM -h -n -N 9 -B 500' 'neuralNetworks.MLP -r 0.00005 -o ADAM -h -n -N 9 -B 2000')
-learners=('neuralNetworks.MultiMLP -h -n -t UseThreads -o 10 -O 10 -b 0.0 -R -P P10')
-learners=('neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 1 -M' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 4 -M' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 50 -M' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 500 -M' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 2000 -M' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 4' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 50' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 500' 'neuralNetworks.MultiMLP -h -n -o 10 -R -P P10 -B 2000')
-learners=('neuralNetworks.MLP -d GPU')
-learners=('neuralNetworks.MultiMLP -d CPU -h -n -o 10 -O 10 -R -P P10 -B 1' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 1' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 4' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 4 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 16' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 16 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 32' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 32 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 64' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 64 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 8' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 8 -M')
+#####################################################################################################
+# learners=('neuralNetworks.ReadVotes')
 
+#####################################################################################################
+# ADL Votes reader
+# learners=('neuralNetworks.ADLVotesReader')
+
+#####################################################################################################
 # 10 MLPs setting
-learners=('neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 1' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 4' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 4 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 8' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 8 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 16' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 16 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 32' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 32 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 64' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 64 -M')
-learners=('neuralNetworks.MultiMLP -d CPU -h -n -o 10 -O 10 -R -P P10 -B 1')
-
-# Ensemble Learners
-learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
-learners=('meta.StreamingRandomPatches -s 30')
+#learners=('neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 1' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 4' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 4 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 8' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 8 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 16' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 16 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 32' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 32 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 64' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P10 -B 64 -M')
+#learners=('neuralNetworks.MultiMLP -d CPU -h -n -o 10 -O 10 -R -P P10 -B 1')
 
 # 10/30 MLPs setting
 #learners=('neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P30 -B 4 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P30 -B 8 -M' 'neuralNetworks.MultiMLP -d GPU -h -n -o 10 -O 10 -R -P P30 -B 16 -M')
@@ -104,12 +95,13 @@ learners=('meta.StreamingRandomPatches -s 30')
 # Selected: 6/30, Minibatch 4, bp=0.3
 #learners=('neuralNetworks.MultiMLP -d GPU -h -n -o 6 -O 6 -R -P P30 -B 4 -b 0.3')
 
-# ADL Votes reader
-# learners=('neuralNetworks.ADLVotesReader')
-
+#####################################################################################################
 # SGT
 #learners=('trees.StreamingGradientTreePredictor')
+# SGT reset on drift
+learners=('moa.classifiers.drift.SingleClassifierDrift -l trees.StreamingGradientTreePredictor -d (ADWINChangeDetector -a 1.0E-6)')
 
+#####################################################################################################
 # Boosting
 # delta
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.01)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -D 0.001)')
@@ -123,12 +115,26 @@ learners=('meta.StreamingRandomPatches -s 30')
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.01')
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.001')
 
+#####################################################################################################
+# Ensemble Learners
+#learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
+#learners=('meta.StreamingRandomPatches')
+#learners=('meta.StreamingRandomPatches -s 30')
 
+
+#####################################################################################################
+# Evaluation method
+# for Final results
 #evaluation_type='EvaluateInterleavedTestThenTrain'
+# for graphs
 evaluation_type='EvaluatePrequential'
 
-sample_frequency=1000
+sample_frequency=1000000
 use_10_percent_sample_frequency=0
+if [ "$evaluation_type" = "EvaluatePrequential" ] ; then
+  sample_frequency=1000
+  use_10_percent_sample_frequency=0
+fi
 max_instances=1000000
 #####################################################################################################
 
