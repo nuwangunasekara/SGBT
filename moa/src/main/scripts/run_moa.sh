@@ -109,11 +109,17 @@ learners=('moa.classifiers.drift.SingleClassifierDrift -l trees.StreamingGradien
 # gamma
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 1)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 2)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 4)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 8)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 16)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor -Y 32)')
 
-# ensemble size
+# ensemble size and learning rate
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30')
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.1')
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.01')
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -L 0.001')
+
+# ensemble size, learning rate and reset
+#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r')
+#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -L 0.1' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -L 0.1')
+#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -L 0.01' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -L 0.01')
+#learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -L 0.001' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -L 0.001')
 
 #####################################################################################################
 # Ensemble Learners
