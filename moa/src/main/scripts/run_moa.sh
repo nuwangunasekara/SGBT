@@ -23,8 +23,11 @@ dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g)
 dataset=(spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
 dataset=(elecNormNew)
 dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
+
 dataset=(RandomTreeGenerator RandomRBF)
 dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF LED AGR_a nomao)
+dataset=(airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed)
+#dataset=(SVHN.scale.t.libsvm.sparse_class_Nominal epsilon_normalized.t_class_Nominal)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
@@ -144,9 +147,9 @@ learners=('moa.classifiers.drift.SingleClassifierDrift -l trees.StreamingGradien
 #####################################################################################################
 # Evaluation method
 # for Final results
-#evaluation_type='EvaluateInterleavedTestThenTrain'
+evaluation_type='EvaluateInterleavedTestThenTrain'
 # for graphs
-evaluation_type='EvaluatePrequential'
+#evaluation_type='EvaluatePrequential'
 
 sample_frequency=1000000
 use_10_percent_sample_frequency=0
