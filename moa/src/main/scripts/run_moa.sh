@@ -213,11 +213,13 @@ if [ $# -gt 5 ]; then
 fi
 echo "Votes dir: $VOTES_DIR"
 
-BASEDIR=`dirname $0`/..
-BASEDIR=`(cd "$BASEDIR"; pwd)`
-REPO=$BASEDIR/../../target/classes
-JAR_PATHS="$(for j in $(find $MAVEN_REPO -name '*.jar');do printf '%s:' $j; done)"
-CLASSPATH="$JAR_PATHS$REPO/"
+#BASEDIR=`dirname $0`/..
+#BASEDIR=`(cd "$BASEDIR"; pwd)`
+#REPO=$BASEDIR/../../target/classes
+#JAR_PATHS="$(for j in $(find $MAVEN_REPO -name '*.jar');do printf '%s:' $j; done)"
+JAR_PATHS="$(find $MAVEN_REPO -name '*moa-*SNAPSHOT.jar'| grep -v 'kafka')"
+#CLASSPATH="$JAR_PATHS$REPO/"
+CLASSPATH="$JAR_PATHS"
 JAVA_AGENT_PATH="$(find $MAVEN_REPO -name 'sizeofag-1.0.4.jar')"
 
 
