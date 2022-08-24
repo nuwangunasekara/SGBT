@@ -272,8 +272,8 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         double previousAccEstimation = driftDetectionMethod.getEstimation();
         driftDetectionMethod.input(correctlyClassifies(inst) ? 0 : 1);
         if (driftDetectionMethod.getChange() && (driftDetectionMethod.getEstimation() < previousAccEstimation)){
-            System.out.println("Drift detected.");
             if (resetEnsemble.isSet()) {
+                System.out.println("Drift detected.");
                 this.resetLearningImpl();
 //              driftDetectionMethod = new ADWIN(1.0E-5);
             }
