@@ -24,15 +24,41 @@ dataset=(spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.s
 dataset=(elecNormNew)
 dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
 
-dataset=(RandomTreeGenerator RandomRBF)
-dataset=(elecNormNewRANDOM RandomTreeGenerator RandomRBF LED AGR_a nomao)
-dataset=(airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed)
-#dataset=(SVHN.scale.t.libsvm.sparse_class_Nominal epsilon_normalized.t_class_Nominal)
+use_datasets_without_drifts=0
+dataset=(AGR_a AGR_g RBF_f RBF_m LED_g LED_a)
+use_datasets_without_drifts=1
+dataset=(RandomTreeGenerator RandomRBF LED elecNormNew nomao airlines covtypeNorm spam_corpus kdd99 WISDM_ar_v1.1_transformed)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
 
+random_seed=121
+random_seed=17
 random_seed=9
+
+# streams
+use_full_generator_for_synthetic=0
+LED_a_S="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 50 -p 250000 ) -w 50 -p 250000 ) -w 50 -p 250000 -r $random_seed )"
+LED_g_S="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 50000 -p 250000 ) -w 50000 -p 250000 ) -w 50000 -p 250000 -r $random_seed )"
+AGR_a_S="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 50 -p 250000 ) -w 50 -p 250000 ) -w 50 -p 250000 -r $random_seed )"
+AGR_g_S="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 50000 -p 250000 ) -w 50000 -p 250000 ) -w 50000 -p 250000 -r $random_seed )"
+RBF_m_S="-s (generators.RandomRBFGeneratorDrift -c 5 -s .0001 -r $random_seed -i $random_seed )"
+RBF_f_S="-s (generators.RandomRBFGeneratorDrift -c 5 -s .001 -r $random_seed -i $random_seed )"
+RandomTreeGenerator_S="-s (generators.RandomTreeGenerator -r $random_seed -i $random_seed)"
+RandomRBF_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed)"
+LED_S="-s (generators.LEDGenerator -i $random_seed)"
+#RandomTreeGenerator RandomRBF LED
+
+use_scaled_generator_for_synthetic=1
+LED_a_S_10="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 50 -p 25000 ) -w 50 -p 25000 ) -w 50 -p 25000 -r $random_seed )"
+LED_g_S_10="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 5000 -p 25000 ) -w 5000 -p 25000 ) -w 5000 -p 25000 -r $random_seed )"
+AGR_a_S_10="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 50 -p 25000 ) -w 50 -p 25000 ) -w 50 -p 25000 -r $random_seed )"
+AGR_g_S_10="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 5000 -p 25000 ) -w 5000 -p 25000 ) -w 5000 -p 25000 -r $random_seed )"
+RBF_m_S_10="$RBF_m_S"
+RBF_f_S_10="$RBF_f_S"
+RandomTreeGenerator_S_10="$RandomTreeGenerator_S"
+RandomRBF_S_10="$RandomRBF_S"
+LED_S_10="$LED_S"
 
 # times to re-run on failure
 max_re_run_count=0
@@ -277,12 +303,39 @@ do
     learner_prefix="${learner// /}"
 
     in_file="${dataset_dir}/${dataset[$i]}.arff"
-    out_file="${out_csv_dir}/${learner_prefix}_${dataset[$i]}.csv"
-    tmp_log_file="${out_csv_dir}/${learner_prefix}_${dataset[$i]}.log"
 
     in_file_lines=$(wc -l $in_file |awk '{print $1}')
     in_file_desc_lines=$(grep -h -n '@data' "$in_file" | awk -F ':' '{print $1}')
     total_number_of_instances=$((in_file_lines - in_file_desc_lines -1))
+
+    out_file_post_fix=''
+    stream="-s (ArffFileStream -f $in_file)"
+
+    if [[ $(echo "${dataset[$i]}" | grep -c 'RandomTreeGenerator\|RBF\|AGR\|LED') -gt 0 ]]; then
+      if [[ $use_full_generator_for_synthetic -eq 1 || $use_scaled_generator_for_synthetic -eq 1 ]]; then
+        if [ $use_scaled_generator_for_synthetic -eq 1 ]; then
+          out_file_post_fix='S10'
+          temp_v_name="${dataset[$i]}_S_10"
+          stream="${!temp_v_name}"
+          max_instances=$((max_instances/10))
+          total_number_of_instances=$((total_number_of_instances/10))
+          if [ "$evaluation_type" = "EvaluateInterleavedTestThenTrain" ] ; then
+            sample_frequency=$((max_instances))
+          fi
+        else
+          out_file_post_fix='S'
+          temp_v_name="${dataset[$i]}_S"
+          stream="${!temp_v_name}"
+        fi
+      fi
+    else
+      # not synthetic
+      if [ $use_datasets_without_drifts -eq 1 ]; then
+        out_file_post_fix="${random_seed}"
+        stream="-s (ArffFileStream -f ${dataset_dir}/${dataset[$i]}RANDOM${random_seed}.arff)"
+      fi
+    fi
+
     warmup_instances=$((total_number_of_instances /100))
     if [ $use_10_percent_sample_frequency -eq 1 ]; then
       sample_frequency=$((warmup_instances * 10))
@@ -290,6 +343,9 @@ do
     if [ $warmup_instances -gt 1000 ]; then
       warmup_instances=1000
     fi
+
+    out_file="${out_csv_dir}/${learner_prefix}_${dataset[$i]}${out_file_post_fix}.csv"
+    tmp_log_file="${out_csv_dir}/${learner_prefix}_${dataset[$i]}${out_file_post_fix}.log"
 
     case $learner in
     neuralNetworks.MultiMLP*)
@@ -327,7 +383,7 @@ do
 
     export "CUDA_VISIBLE_DEVICES=$GPUs_to_use"
 
-    exp_cmd="moa.DoTask \"$evaluation_type -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
+    exp_cmd="moa.DoTask \"$evaluation_type -l ($learner_command) $stream -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
     echo -e "$JCMD -classpath $CLASSPATH -Xmx32g -Xms50m -Xss1g -javaagent:$JAVA_AGENT_PATH"
     echo -e "\n$exp_cmd\n"
     echo -e "\n$exp_cmd\n" > $tmp_log_file
@@ -336,7 +392,7 @@ do
     -classpath "$CLASSPATH" \
     -Xmx32g -Xms50m -Xss1g \
     -javaagent:"$JAVA_AGENT_PATH" \
-    moa.DoTask "$evaluation_type -l ($learner_command) -s (ArffFileStream -f $in_file) -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
+    moa.DoTask "$evaluation_type -l ($learner_command) $stream -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
 
     if [ -z $! ]; then
       task_failed=1
