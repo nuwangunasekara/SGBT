@@ -224,6 +224,9 @@ public class StreamingGradientTreePredictor extends AbstractClassifier implement
 
     @Override
     public Measurement[] getModelMeasurementsImpl() {
+        if(true){
+            return null;
+        }
 
         double nodes = 0.0;
         double splits = 0.0;
