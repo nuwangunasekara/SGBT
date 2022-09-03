@@ -161,7 +161,10 @@ learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredicto
 # Ensemble Learners
 #learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
 #learners=('meta.StreamingRandomPatches' 'meta.StreamingRandomPatches -s 30')
-
+# SRP with SGT
+#learners=('meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor')
+#learners=('meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor -s 30')
+#learners=('meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor' 'meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor -s 30')
 
 #####################################################################################################
 # Evaluation method
