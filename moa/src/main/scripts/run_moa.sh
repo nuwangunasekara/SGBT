@@ -27,7 +27,7 @@ dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g sp
 use_datasets_without_drifts=0
 dataset=(AGR_a AGR_g RBF_f RBF_m LED_g LED_a)
 use_datasets_without_drifts=1
-dataset=(RandomTreeGenerator RandomRBF LED elecNormNew nomao airlines covtypeNorm spam_corpus kdd99 WISDM_ar_v1.1_transformed)
+dataset=(RandomTreeGenerator RandomRBF LED elecNormNew nomao airlines covtypeNorm WISDM_ar_v1.1_transformed)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
