@@ -28,7 +28,7 @@ LED_S="-s (generators.LEDGenerator -i $random_seed)"
 ## How to set up environment
 ### From source root run:
 > bash ./moa/src/main/scripts/reinit_conda.sh <conda_env_path> ./moa/src/main/scripts/conda.yml
-## How to build MOA for
+## How to build MOA
 ### From source root run:
 > bash ./moa/src/main/scripts/build_moa.sh <maven_repo_path> <conda_env_path>
 ## Run GUI
