@@ -1,6 +1,6 @@
 # Gradient-Boosted-Trees-for-Evolving-Data-Streams
 
-# Run MOA experiments with [DJL](https://djl.ai)
+# Run MOA experiments
 ## Requirements
 * [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 ## Datasets
@@ -26,16 +26,21 @@ RandomRBF5_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed 
 LED_S="-s (generators.LEDGenerator -i $random_seed)"
 ```
 ## How to set up environment
-###From source root run:
-> bash ./moa/src/main/scripts/reinit_conda.sh ~/Desktop/conda/ moa/src/main/scripts/conda.yml
+### From source root run:
+> bash ./moa/src/main/scripts/reinit_conda.sh <conda_env_path> ./moa/src/main/scripts/conda.yml
 ## How to build MOA for
-###From source root run:
-> bash ./moa/src/main/scripts/build_moa.sh ~/Desktop/m2/ ~/Desktop/conda/
+### From source root run:
+> bash ./moa/src/main/scripts/build_moa.sh <maven_repo_path> <conda_env_path>
 ## Run GUI
-> bash ./moa/src/main/scripts/build_moa.sh ~/Desktop/m2/ ~/Desktop/conda/  ~/Desktop/djl.ai
+> bash moa/src/main/scripts/moa_gui_with_NN_support.sh <maven_repo_path> <conda_env_path> <djl_cache_dir>
 ## Run experiments
-###From < results dir > run:
-> bash < moa source root >/moa/src/main/scripts/run_moa.sh < dataset dir > < results dir > < DJL cache dir > < directory for separate maven repository > < directory for conda environment >
+### From < results dir > run:
+> bash <moa_source_root>/moa/src/main/scripts/run_moa.sh <dataset_dir> <results_dir> <djl_cache_dir> <maven_repo_path> <conda_env_path>
 
-e.g
-> bash ~/Desktop/moa_fork/moa/src/main/scripts/run_moa.sh ~/Desktop/datasets/ ~/Desktop/results/Exp1/ ~/Desktop/djl.ai/ ~/Desktop/m2/ ~/Desktop/conda/
+Notes:- 
+
+```<moa_source_root>/moa/src/main/scripts/run_moa.sh``` could be copied to any place and run.
+
+Change ```dataset``` variable in ```run_moa.sh``` to change the data set.
+
+Change ```learners``` variable in ```run_moa.sh``` to change learner command. 
