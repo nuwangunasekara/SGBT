@@ -4,8 +4,8 @@
 ## Requirements
 * [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 ## Datasets
-### datasets from Streaming Random Patches (SRP): https://github.com/hmgomes/StreamingRandomPatches/tree/master/datasets
-### synthetic data sets:
+* datasets from Streaming Random Patches (SRP): https://github.com/hmgomes/StreamingRandomPatches/tree/master/datasets
+* synthetic data sets:
 ```
 LED_a_S="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 50 -p 250000 ) -w 50 -p 250000 ) -w 50 -p 250000 -r $random_seed )"
 LED_g_S="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 50000 -p 250000 ) -w 50000 -p 250000 ) -w 50000 -p 250000 -r $random_seed )"
