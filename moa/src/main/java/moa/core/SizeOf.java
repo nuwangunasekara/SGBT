@@ -20,6 +20,7 @@
  */
 package moa.core;
 
+import org.openjdk.jol.info.GraphLayout;
 import sizeof.agent.SizeOfAgent;
 
 /**
@@ -47,6 +48,7 @@ public class SizeOf {
                 m_Present = false;
             }
         }
+        m_Present = false;
 
         return m_Present;
     }
@@ -59,9 +61,11 @@ public class SizeOf {
      */
     public static long sizeOf(Object o) {
         if (isPresent()) {
-            return SizeOfAgent.sizeOf(o);
+//            return SizeOfAgent.sizeOf(o);
+            return GraphLayout.parseInstance(o).totalSize();
         } else {
-            return -1;
+            return GraphLayout.parseInstance(o).totalSize();
+//            return -1;
         }
     }
 
@@ -73,9 +77,16 @@ public class SizeOf {
      */
     public static long fullSizeOf(Object o) {
         if (isPresent()) {
-            return SizeOfAgent.fullSizeOf(o);
+            System.gc();
+//            long fullSize = SizeOfAgent.fullSizeOf(o);
+//            long fullSize = SizeOfAgent.fullSizeOf(o);
+//            System.out.println("Size of: " +fullSize +" " + GraphLayout.parseInstance(o).totalSize());
+            long fullSize = GraphLayout.parseInstance(o).totalSize();
+            System.gc();
+            return fullSize;
         } else {
-            return -1;
+//            return -1;
+            return GraphLayout.parseInstance(o).totalSize();
         }
     }
 }

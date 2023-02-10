@@ -55,6 +55,17 @@ public class LearningEvaluation extends AbstractMOAObject {
         measurementList.addAll(Arrays.asList(model.getModelMeasurements()));
         this.measurements = measurementList.toArray(new Measurement[measurementList.size()]);
     }
+    public LearningEvaluation(Measurement[] evaluationMeasurements,
+                              LearningPerformanceEvaluator cpe, Learner model, double modelMeasureByteSize) {
+        List<Measurement> measurementList = new LinkedList<Measurement>();
+        if (evaluationMeasurements != null){
+            measurementList.addAll(Arrays.asList(evaluationMeasurements));
+        }
+        measurementList.addAll(Arrays.asList(cpe.getPerformanceMeasurements(true)));
+        measurementList.addAll(Arrays.asList(model.getModelMeasurements(modelMeasureByteSize)));
+        this.measurements = measurementList.toArray(new Measurement[measurementList.size()]);
+    }
+
 
     public LearningEvaluation(
             LearningPerformanceEvaluator cpe, Learner model) {

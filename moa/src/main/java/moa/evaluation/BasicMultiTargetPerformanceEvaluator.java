@@ -76,6 +76,12 @@ public class BasicMultiTargetPerformanceEvaluator extends AbstractMOAObject
         }
     }
 
+
+    @Override
+    public Measurement[] getPerformanceMeasurements(boolean printStats){
+        return getPerformanceMeasurements();
+    }
+
     @Override
     public Measurement[] getPerformanceMeasurements() {
         return new Measurement[]{

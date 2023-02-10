@@ -128,6 +128,15 @@
     <artifactId>ssj</artifactId>
     <version>2.5</version>
   </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.openjdk.jol/jol-core -->
+    <dependency>
+      <groupId>org.openjdk.jol</groupId>
+      <artifactId>jol-core</artifactId>
+      <version>0.16</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -202,6 +211,25 @@
             <goals>
               <goal>jar</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- outputs a GraphML file with the dependency tree (for analyzing where artifacts come from) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+        <executions>
+          <execution>
+            <id>tree</id>
+            <phase>package</phase>
+            <goals>
+              <goal>tree</goal>
+            </goals>
+            <configuration>
+              <outputType>graphml</outputType>
+              <outputFile>${project.build.directory}/${project.artifactId}-${project.version}.graphml</outputFile>
+            </configuration>
           </execution>
         </executions>
       </plugin>

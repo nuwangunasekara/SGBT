@@ -20,7 +20,6 @@
 package moa.classifiers.rules.functions;
 
 import java.util.LinkedList;
-import java.util.Random;
 
 import moa.classifiers.AbstractClassifier;
 import moa.core.DoubleVector;
@@ -53,8 +52,8 @@ public class Perceptron extends AbstractClassifier implements AMRulesRegressorFu
 			"fadingFactor", 'e', 
 			"Fading factor for the Perceptron accumulated error", 0.99, 0, 1);
 	
-	public IntOption randomSeedOption = new IntOption("randomSeed", 'r',
-            "Seed for random behaviour of the classifier.", 1);
+//	public IntOption randomSeedOption = new IntOption("randomSeed", 'r',
+//            "Seed for random behaviour of the classifier.", 1);
 	
 	private double nError;
 	protected double fadingFactor;
@@ -88,7 +87,7 @@ public class Perceptron extends AbstractClassifier implements AMRulesRegressorFu
 	public Perceptron()
 	{
 		super();
-		super.randomSeedOption=randomSeedOption;
+//		super.randomSeedOption=randomSeedOption;
 		this.initialisePerceptron = true;
 	}
 

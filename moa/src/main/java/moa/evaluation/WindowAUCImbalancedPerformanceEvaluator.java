@@ -472,6 +472,12 @@ public class WindowAUCImbalancedPerformanceEvaluator extends
 		}
 	}
 
+
+	@Override
+	public Measurement[] getPerformanceMeasurements(boolean printStats){
+		return getPerformanceMeasurements();
+	}
+
 	@Override
 	public Measurement[] getPerformanceMeasurements() {
 		return new Measurement[] {

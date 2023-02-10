@@ -19,9 +19,7 @@
  */
 package moa.tasks;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 
 import moa.capabilities.Capability;
 import moa.capabilities.ImmutableCapabilities;
@@ -41,6 +39,8 @@ import com.github.javacliparser.IntOption;
 import moa.streams.ExampleStream;
 import moa.streams.InstanceStream;
 import com.yahoo.labs.samoa.instances.Instance;
+import org.openjdk.jol.info.GraphLayout;
+//import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 
 /**
  * Task for evaluating a classifier on a stream by testing then training with each example in sequence.
@@ -109,7 +109,7 @@ public class EvaluateInterleavedTestThenTrain extends ClassificationMainTask {
         
         Learner learner = (Learner) getPreparedClassOption(this.learnerOption);
         if (learner.isRandomizable()) {
-            learner.setRandomSeed(this.randomSeedOption.getValue());
+//            learner.setRandomSeed(this.randomSeedOption.getValue());
             learner.resetLearning();
         }
         ExampleStream stream = (InstanceStream) getPreparedClassOption(this.streamOption);
@@ -162,10 +162,74 @@ public class EvaluateInterleavedTestThenTrain extends ClassificationMainTask {
                 long evaluateTime = TimingUtils.getNanoCPUTimeOfCurrentThread();
                 double time = TimingUtils.nanoTimeToSeconds(evaluateTime - evaluateStartTime);
                 double timeIncrement = TimingUtils.nanoTimeToSeconds(evaluateTime - lastEvaluateStartTime);
-                double RAMHoursIncrement = learner.measureByteSize() / (1024.0 * 1024.0 * 1024.0); //GBs
+                double RAMHoursIncrement = 0.0;
+                double modelMeasureByteSize = 0.0;
+                if (memCheckFrequencyOption.getValue() > 0) {
+                    System.gc();
+
+                    float timeTakenBymeasureByteSize = 0;
+//                    float timeTakenByFileWrite = 0;
+//                    double modelMeasureByteSizeByFileWrite = 0.0;
+//                    float timeTakenByGraphLayout = 0;
+//                    double modelMeasureByteSizeByGraphLayout = 0.0;
+//                    float timeTakenByObjectSizeCalculator = 0;
+//                    double modelMeasureByteSizeByObjectSizeCalculator = 0.0;
+
+                    long t1 = 0;
+                    long t2 = 0;
+                    t1 = System.currentTimeMillis();
+//                    modelMeasureByteSize = learner.measureByteSize();
+                    modelMeasureByteSize = GraphLayout.parseInstance(learner).totalSize();
+                    t2 = System.currentTimeMillis();
+                    timeTakenBymeasureByteSize = (t2 - t1) / 1000F;
+
+//                    try {
+//                        System.gc();
+//                        t1 = System.currentTimeMillis();
+//
+//                        FileOutputStream fileOutputStream
+//                                = new FileOutputStream("/Users/ng98/Desktop/FileSize.txt");
+//                        ObjectOutputStream objectOutputStream
+//                                = new ObjectOutputStream(fileOutputStream);
+//                        objectOutputStream.writeObject(learner);
+//                        objectOutputStream.flush();
+//                        objectOutputStream.close();
+//
+//                        t2 = System.currentTimeMillis();
+//                        timeTakenByFileWrite = (t2 - t1) / 1000F;
+//
+//                        File file = new File("/Users/ng98/Desktop/FileSize.txt");
+//                        modelMeasureByteSizeByFileWrite = file.length();
+//                        file.delete();
+//                    } catch (FileNotFoundException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                    t1 = System.currentTimeMillis();
+//                    modelMeasureByteSizeByGraphLayout = GraphLayout.parseInstance(learner).totalSize();
+//                    t2 = System.currentTimeMillis();
+//                    timeTakenByGraphLayout = (t2 - t1) / 1000F;
+
+//                    t1 = System.currentTimeMillis();
+//                    modelMeasureByteSizeByObjectSizeCalculator = ObjectSizeCalculator.getObjectSize(learner);
+//                    t2 = System.currentTimeMillis();
+//                    timeTakenByObjectSizeCalculator = (t2 - t1) / 1000F;
+
+
+                    System.out.println(
+                            " SIZE :" +
+//                            " File : ("+ modelMeasureByteSizeByFileWrite + " B) ("+ timeTakenByFileWrite + " ms) " +
+                            " MOA : (" + modelMeasureByteSize+ " B) ("+ timeTakenBymeasureByteSize + " ms) "
+//                            " GS : (" + modelMeasureByteSizeByGraphLayout+ " B) ("+ timeTakenByGraphLayout + " ms) "
+                    );
+
+                    RAMHoursIncrement = modelMeasureByteSize / (1024.0 * 1024.0 * 1024.0); //GBs
+                }
                 RAMHoursIncrement *= (timeIncrement / 3600.0); //Hours
                 RAMHours += RAMHoursIncrement;
                 lastEvaluateStartTime = evaluateTime;
+                System.gc();
                 learningCurve.insertEntry(new LearningEvaluation(
                         new Measurement[]{
                             new Measurement(
@@ -180,7 +244,7 @@ public class EvaluateInterleavedTestThenTrain extends ClassificationMainTask {
                             "model cost (RAM-Hours)",
                             RAMHours)
                         },
-                        evaluator, learner));
+                        evaluator, learner, modelMeasureByteSize));
                 if (immediateResultStream != null) {
                     if (firstDump) {
                         immediateResultStream.print("Learner,stream,randomSeed,");

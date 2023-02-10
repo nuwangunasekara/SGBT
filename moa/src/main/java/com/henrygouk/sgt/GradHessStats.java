@@ -47,14 +47,14 @@ public class GradHessStats implements Serializable {
         mScaledCovariance += stats.mScaledCovariance + meanDiff.gradient * meanDiff.hessian * (n1 * n2) / (n1 + n2);
 
         // Do the other bits
-        mSum.add(stats.mSum);
+        mSum.add(stats.mSum, 1.0);
         mObservations += stats.mObservations;
     }
 
-    public void addObservation(GradHess gradHess) {
+    public void addObservation(GradHess gradHess, Double weight) {
         GradHess oldMean = getMean();
-        mSum.add(gradHess);
-        mObservations++;
+        mSum.add(gradHess, weight.doubleValue());// multiply by weight
+        mObservations += weight.doubleValue(); // multiply by weight
         GradHess newMean = getMean();
 
         mScaledVariance.gradient += (gradHess.gradient - oldMean.gradient) * (gradHess.gradient - newMean.gradient);

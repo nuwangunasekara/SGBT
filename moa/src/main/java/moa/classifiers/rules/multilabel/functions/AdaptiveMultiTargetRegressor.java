@@ -55,9 +55,9 @@ implements MultiTargetRegressor, AMRulesFunction {
 
 	public ClassOption errorMeasurerOption;
 	
-	public IntOption randomSeedOption = new IntOption("randomSeedOption",
-			'r', "randomSeedOption", 
-			1,Integer.MIN_VALUE, Integer.MAX_VALUE);
+//	public IntOption randomSeedOption = new IntOption("randomSeedOption",
+//			'r', "randomSeedOption",
+//			1,Integer.MIN_VALUE, Integer.MAX_VALUE);
 
 	protected boolean hasStarted;
 
@@ -67,7 +67,7 @@ implements MultiTargetRegressor, AMRulesFunction {
 	protected MultiTargetErrorMeasurer [] errorMeasurer;
 
 	public AdaptiveMultiTargetRegressor(){
-		super.randomSeedOption=randomSeedOption;
+//		super.randomSeedOption=randomSeedOption;
 		baseLearnerOption1 = new ClassOption("baseLearner1", 'l',
 				"First base learner.", AMRulesFunction.class, MultiTargetMeanRegressor.class.getName()) ;
 		baseLearnerOption2= new ClassOption("baseLearner2", 'm',
@@ -132,7 +132,7 @@ implements MultiTargetRegressor, AMRulesFunction {
 		this.hasStarted = false;
 		if(baseLearner!=null){
 			for (int i=0; i<baseLearner.length; i++){
-				classifierRandom.setSeed(randomSeedOption.getValue());
+//				classifierRandom.setSeed(randomSeedOption.getValue());
 				baseLearner[i].setRandomSeed(this.randomSeed);
 				baseLearner[i].resetLearning();
 			}

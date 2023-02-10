@@ -71,7 +71,7 @@ public class StreamingGradientTreeNetwork implements Serializable, MultiOutputLe
         }
     }
 
-    public void update(int[] features, GradHess[] gradHesses) {
+    public void update(int[] features, GradHess[] gradHesses, Double[] weights) {
         double[][] activations = new double[mLayers.length + 1][];
         activations[0] = IntStream.range(0, mTrees.length)
                                   .parallel()
@@ -90,7 +90,7 @@ public class StreamingGradientTreeNetwork implements Serializable, MultiOutputLe
 
         IntStream.range(0, mTrees.length)
                  .parallel()
-                 .forEach(i -> mTrees[i].update(features, finalGradHesses[i]));
+                 .forEach(i -> mTrees[i].update(features, finalGradHesses[i], weights[i]));
     }
 
     public double[] predict(int[] features) {

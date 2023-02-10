@@ -905,6 +905,7 @@ public class TaskManagerTabPanel extends JPanel {
             for (int j = 0; j < jTableStreams.getModel().getRowCount(); j++) {
                 String stream = jTableStreams.getModel().getValueAt(j, 0).toString();
                 String streamFile = jTableStreams.getModel().getValueAt(j, 1).toString();
+                streamFile = streamFile.replace(" ", "_");
                 streamNames += streamFile.split(" ")[0];
                 if (j != jTableStreams.getModel().getRowCount() - 1) {
                     streamNames += ",";

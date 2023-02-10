@@ -125,6 +125,12 @@ public class WindowRegressionPerformanceEvaluator extends AbstractOptionHandler
         }
     }
 
+
+    @Override
+    public Measurement[] getPerformanceMeasurements(boolean printStats){
+        return getPerformanceMeasurements();
+    }
+
     @Override
     public Measurement[] getPerformanceMeasurements() {
         return new Measurement[]{

@@ -60,6 +60,7 @@ public interface LearningPerformanceEvaluator<E extends Example> extends MOAObje
      * @return an array of measurements monitored by this evaluator
      */
 	public Measurement[] getPerformanceMeasurements();
+	public Measurement[] getPerformanceMeasurements(boolean printStats);
 
 	@Override
 	default ImmutableCapabilities defineImmutableCapabilities() {

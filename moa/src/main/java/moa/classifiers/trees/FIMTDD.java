@@ -60,6 +60,9 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 
 	protected int leafNodeCount = 0;
 	protected int splitNodeCount = 0;
+	protected int splitsByConfidence = 0;
+	protected int splitsByHBound = 0;
+	protected int splitsByHBoundSmallerThanTieThreshold = 0;
 
 	protected double examplesSeen = 0.0;
 	protected double sumOfValues = 0.0;
@@ -121,6 +124,9 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 
 	public FlagOption learningRatioConstOption = new FlagOption(
 			"learningRatioConst", 'p', "Keep learning rate constant instead of decaying.");
+
+	public FlagOption releasePerceptronAfterSplit = new FlagOption(
+			"releasePerceptronAfterSplit", 'F', "releasePerceptronAfterSplit");
 
 	//endregion ================ OPTIONS ================
 
@@ -303,10 +309,10 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 				FIMTDDNumericAttributeClassObserver obs = attributeObservers.get(i);
 				if (obs == null) {
 					// At this stage all nominal attributes are ignored
-					if (inst.attribute(instAttIndex).isNumeric()) {
-						obs = tree.newNumericClassObserver();
-						this.attributeObservers.set(i, obs);
-					}
+//					if (inst.attribute(instAttIndex).isNumeric()) {
+//					}
+					obs = tree.newNumericClassObserver();
+					this.attributeObservers.set(i, obs);
 				}
 				if (obs != null) {
 					obs.observeAttributeClass(inst.value(instAttIndex), inst.classValue(), inst.weight());
@@ -460,6 +466,7 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 		public void initializeAlternateTree() {
 			// Start a new alternate tree, beginning with a learning node
 			alternateTree = tree.newLeafNode();
+//			System.gc();
 			alternateTree.originalNode = this;
 
 			// Set up the blank statistics
@@ -796,8 +803,10 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 								parent.setChild(parent.getChildIndex(currentNode), replacementTree);
 								if (growthAllowed) replacementTree.restartChangeDetection();
 							} else {
+								System.out.println("Using Alternate tree " + examplesSeen);
 								treeRoot = iNode.alternateTree;
 								treeRoot.restartChangeDetection();
+//								System.gc();
 							}
 
 							currentNode = iNode.alternateTree;
@@ -811,6 +820,7 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 							iNode.alternateTree = null;
 							if (growthAllowed) iNode.restartChangeDetection();
 							altTree = false;
+							System.gc();
 						}
 					}
 
@@ -886,7 +896,10 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 
 		// If only one split was returned, use it
 		if (bestSplitSuggestions.length < 2) {
-			shouldSplit = bestSplitSuggestions.length > 0;
+			if (bestSplitSuggestions.length > 0){
+				shouldSplit = true;
+				splitsByConfidence++;
+			}
 		} else { // Otherwise, consider which of the splits proposed may be worth trying
 
 			// Determine the Hoeffding bound value, used to select how many instances should be used to make a test decision
@@ -905,6 +918,12 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 			// competing attributes are equally good, and the split will be made on the one with the higher SDR value.
 			if ((secondBestSuggestion.merit / bestSuggestion.merit < 1 - hoeffdingBound) || (hoeffdingBound < this.tieThresholdOption.getValue())) {
 				shouldSplit = true;
+				if (secondBestSuggestion.merit / bestSuggestion.merit < 1 - hoeffdingBound){
+					splitsByHBound++;
+				}
+				if(hoeffdingBound < this.tieThresholdOption.getValue()){
+					splitsByHBoundSmallerThanTieThreshold++;
+				}
 			}
 			// If the splitting criterion was not met, initiate pruning of the E-BST structures in each attribute observer
 			else {
@@ -932,6 +951,9 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 				if (buildingModelTree()) {
 					// Copy the splitting node's perceptron to it's children
 					newChild.learningModel = new FIMTDDPerceptron((FIMTDDPerceptron) node.learningModel);
+					if (releasePerceptronAfterSplit.isSet()){
+						node.learningModel=null;
+					}
 					
 				}
 				newChild.changeDetection = node.changeDetection;
@@ -943,6 +965,7 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 				treeRoot = newSplit;
 			} else if (parent == null && node.originalNode != null) {
 				node.originalNode.alternateTree = newSplit;
+//				System.gc();
 			} else {
 				((SplitNode) parent).setChild(parentIndex, newSplit);
 				newSplit.setParent(parent);

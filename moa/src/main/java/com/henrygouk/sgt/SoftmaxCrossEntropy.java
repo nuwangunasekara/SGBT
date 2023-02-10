@@ -1,18 +1,27 @@
 package com.henrygouk.sgt;
 
 import java.io.Serializable;
+import java.util.stream.IntStream;
 
 public class SoftmaxCrossEntropy extends Objective implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GradHess[] computeDerivatives(double[] groundTruth, double[] raw) {
+    public GradHess[] computeDerivatives(double[] groundTruth, double[] raw, boolean computeNegativeResidual, boolean clipPredictions) {
         GradHess[] result = new GradHess[raw.length];
         double[] predictions = transfer(raw);
 
         for(int i = 0; i < result.length; i++) {
-            result[i] = new GradHess(predictions[i] - groundTruth[i], predictions[i] * (1.0 - predictions[i]));
+            if (clipPredictions){
+                predictions[i] = Math.max(predictions[i] , 0.0001);
+                predictions[i] = Math.min(predictions[i] , 0.9999);
+            }
+            if (computeNegativeResidual){
+                result[i] = new GradHess(predictions[i] - groundTruth[i], predictions[i] * (1.0 - predictions[i]));
+            }else{
+                result[i] = new GradHess(groundTruth[i] - predictions[i], predictions[i] * (1.0 - predictions[i]));
+            }
         }
 
         return result;
@@ -45,4 +54,19 @@ public class SoftmaxCrossEntropy extends Objective implements Serializable {
         return result;
     }
 
+//    @Override
+//    public double loss (double[] groundTruth){
+//        return this.loss(groundTruth, predictions);
+//    }
+//
+//    @Override
+//    public double loss (double[] groundTruth, double[] preds){
+//        double [] ll = new double[preds.length];
+//        IntStream.range(0, preds.length).parallel().forEach(i -> ll[i]=groundTruth[i]*Math.log(preds[i]));
+//        double l = 0.0;
+//        for (int i=0; i < ll.length; i++){
+//            l += ll[i];
+//        }
+//        return -l;
+//    }
 }

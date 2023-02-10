@@ -48,6 +48,8 @@ import moa.streams.ExampleStream;
 import com.yahoo.labs.samoa.instances.Instance;
 import moa.core.Utils;
 
+import org.openjdk.jol.info.GraphLayout;
+
 /**
  * Task for evaluating a classifier on a stream by testing then training with each example in sequence.
  *
@@ -213,10 +215,32 @@ public class EvaluatePrequential extends ClassificationMainTask implements Capab
                 long evaluateTime = TimingUtils.getNanoCPUTimeOfCurrentThread();
                 double time = TimingUtils.nanoTimeToSeconds(evaluateTime - evaluateStartTime);
                 double timeIncrement = TimingUtils.nanoTimeToSeconds(evaluateTime - lastEvaluateStartTime);
-                double RAMHoursIncrement = learner.measureByteSize() / (1024.0 * 1024.0 * 1024.0); //GBs
+                double RAMHoursIncrement = 0.0;
+                double modelMeasureByteSize = 0.0;
+                if (memCheckFrequencyOption.getValue() > 0) {
+                    System.gc();
+
+                    float timeTakenBymeasureByteSize = 0;
+                    long t1 = 0;
+                    long t2 = 0;
+                    t1 = System.currentTimeMillis();
+//                    modelMeasureByteSize = learner.measureByteSize();
+                    modelMeasureByteSize = GraphLayout.parseInstance(learner).totalSize();
+                    RAMHoursIncrement = modelMeasureByteSize / (1024.0 * 1024.0 * 1024.0); //GBs
+                    t2 = System.currentTimeMillis();
+                    timeTakenBymeasureByteSize = (t2 - t1) / 1000F;
+
+                    System.out.println(
+                            " SIZE :" +
+//                            " File : ("+ modelMeasureByteSizeByFileWrite + " B) ("+ timeTakenByFileWrite + " ms) " +
+                                    " MOA : (" + modelMeasureByteSize+ " B) ("+ timeTakenBymeasureByteSize + " ms) "
+//                            " GS : (" + modelMeasureByteSizeByGraphLayout+ " B) ("+ timeTakenByGraphLayout + " ms) "
+                    );
+                }
                 RAMHoursIncrement *= (timeIncrement / 3600.0); //Hours
                 RAMHours += RAMHoursIncrement;
                 lastEvaluateStartTime = evaluateTime;
+                System.gc();
                 learningCurve.insertEntry(new LearningEvaluation(
                         new Measurement[]{
                             new Measurement(
@@ -231,7 +255,7 @@ public class EvaluatePrequential extends ClassificationMainTask implements Capab
                             "model cost (RAM-Hours)",
                             RAMHours)
                         },
-                        evaluator, learner));
+                        evaluator, learner, modelMeasureByteSize));
 
                 if (immediateResultStream != null) {
                     if (firstDump) {

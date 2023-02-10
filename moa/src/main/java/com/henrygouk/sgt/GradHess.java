@@ -24,9 +24,9 @@ public class GradHess implements Serializable {
         hessian = hess;
     }
 
-    void add(GradHess gradHess) {
-        gradient += gradHess.gradient;
-        hessian += gradHess.hessian;
+    void add(GradHess gradHess, double scaleFactor) {
+        gradient += (gradHess.gradient) * scaleFactor;
+        hessian += (gradHess.hessian) * scaleFactor;
     }
 
     void sub(GradHess gradHess) {

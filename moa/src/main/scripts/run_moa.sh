@@ -1,7 +1,7 @@
 #trap "kill 0" EXIT
 print_usage()
 {
-  echo "Usage: $0 <dataset_dir> <out_csv_dir> <djl_cache_dir> <local_maven_repo>"
+  echo "Usage: $0 <dataset_dir> <out_csv_dir> <djl_cache_dir> <local_maven_repo> <conda>"
   echo "e.g:   $0 ~/Desktop/datasets/NEW/unzipped/ ~/Desktop/results ~/Desktop/djl.ai/ ~/Desktop/m2_cache/ /Users/ng98/Desktop/condaJava"
   echo "e.g:   $0 /Scratch/ng98/datasets/NEW/unzipped/ /Scratch/ng98/JavaSetup1/resultsNN/Exp17_test/ /Scratch/ng98/JavaSetup1/djl.ai/ /Scratch/ng98/JavaSetup1/local_m2/ /Scratch/ng98/JavaSetup1/conda"
 }
@@ -25,9 +25,28 @@ dataset=(elecNormNew)
 dataset=(elecNormNew airlines covtypeNorm RBF_f RBF_m LED_g LED_a AGR_a AGR_g spam_corpus kdd99 WISDM_ar_v1.1_transformed nomao SVHN.scale.t.libsvm.sparse_class_Nominal sector.scale.libsvm.class_Nominal_sparse gisette_scale_class_Nominal epsilon_normalized.t_class_Nominal)
 
 use_datasets_without_drifts=0
-dataset=(AGR_a AGR_g RBF_f RBF_m LED_g LED_a)
-use_datasets_without_drifts=1
-dataset=(RandomTreeGenerator RandomRBF LED elecNormNew nomao airlines covtypeNorm WISDM_ar_v1.1_transformed)
+#dataset=(AGR_a AGR_g elecNormNew airlines)
+dataset=(AGR_a AGR_g elecNormNew)
+#dataset=(AGR_a AGR_g)
+#dataset=(LED _g LED_a)
+#dataset=(RBF_f RBF_m)
+#dataset=(AGR_a)
+#dataset=(AGR_g)
+#dataset=(LED_a)
+#dataset=(LED_g)
+#dataset=(RBF_f)
+#dataset=(RBF_m)
+#dataset=(RBF_Bf)
+#dataset=(RBF_Bm)
+#dataset=(airlines)
+#dataset=(elecNormNew)
+dataset=(covtypeNorm)
+# use_datasets_without_drifts=1
+#dataset=(RandomTreeGenerator RandomRBF LED elecNormNew nomao airlines covtypeNorm WISDM_ar_v1.1_transformed)
+#dataset=(RandomRBF5 RandomTreeGenerator LED airlines)
+#dataset=(RandomRBF5)
+#dataset=(RandomTreeGenerator)
+# dataset=(LED)
 
 datasets_to_repeat=(WISDM_ar_v1.1_transformed elecNormNew nomao)
 max_repeat=0
@@ -42,10 +61,17 @@ LED_a_S="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (Con
 LED_g_S="-s (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 1)   -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 3) -d (ConceptDriftStream -s (generators.LEDGeneratorDrift -d 5)  -d (generators.LEDGeneratorDrift -d 7) -w 50000 -p 250000 ) -w 50000 -p 250000 ) -w 50000 -p 250000 -r $random_seed )"
 AGR_a_S="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 50 -p 250000 ) -w 50 -p 250000 ) -w 50 -p 250000 -r $random_seed )"
 AGR_g_S="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 50000 -p 250000 ) -w 50000 -p 250000 ) -w 50000 -p 250000 -r $random_seed )"
-RBF_m_S="-s (generators.RandomRBFGeneratorDrift -c 5 -s .0001 -r $random_seed -i $random_seed )"
-RBF_f_S="-s (generators.RandomRBFGeneratorDrift -c 5 -s .001 -r $random_seed -i $random_seed )"
+RBF_m_S="-s (generators.RandomRBFGeneratorDrift -c 5 -s .0001 -r $random_seed -i $random_seed)"
+RBF_f_S="-s (generators.RandomRBFGeneratorDrift -c 5 -s .001 -r $random_seed -i $random_seed)"
+RBF_Bm_S="-s (generators.RandomRBFGeneratorDrift -c 2 -s .0001 -r $random_seed -i $random_seed)"
+RBF_Bf_S="-s (generators.RandomRBFGeneratorDrift -c 2 -s .001 -r $random_seed -i $random_seed)"
 RandomTreeGenerator_S="-s (generators.RandomTreeGenerator -r $random_seed -i $random_seed)"
 RandomRBF_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed)"
+RandomRBF_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed -c 3)"
+RandomRBF3_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed -c 3)"
+RandomRBF5_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed -c 5)"
+RandomRBF6_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed -c 6)"
+RandomRBF9_S="-s (generators.RandomRBFGenerator -r $random_seed -i $random_seed -c 9)"
 LED_S="-s (generators.LEDGenerator -i $random_seed)"
 #RandomTreeGenerator RandomRBF LED
 
@@ -56,8 +82,14 @@ AGR_a_S_10="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (Con
 AGR_g_S_10="-s (ConceptDriftStream -s (generators.AgrawalGenerator -f 1) -d (ConceptDriftStream -s (generators.AgrawalGenerator -f 2) -d (ConceptDriftStream -s (generators.AgrawalGenerator )   -d (generators.AgrawalGenerator -f 4) -w 5000 -p 25000 ) -w 5000 -p 25000 ) -w 5000 -p 25000 -r $random_seed )"
 RBF_m_S_10="$RBF_m_S"
 RBF_f_S_10="$RBF_f_S"
+RBF_Bm_S_10="$RBF_Bm_S"
+RBF_Bf_S_10="$RBF_Bf_S"
 RandomTreeGenerator_S_10="$RandomTreeGenerator_S"
 RandomRBF_S_10="$RandomRBF_S"
+RandomRBF3_S_10="$RandomRBF3_S"
+RandomRBF5_S_10="$RandomRBF5_S"
+RandomRBF6_S_10="$RandomRBF6_S"
+RandomRBF9_S_10="$RandomRBF9_S"
 LED_S_10="$LED_S"
 
 # times to re-run on failure
@@ -157,6 +189,11 @@ learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredicto
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 50 -r -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -r -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -L 0.1 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -L 0.1 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -L 0.1 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -L 0.1 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 50 -r -L 0.1 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -r -L 0.1 -m 60')
 #learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -L 0.01 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -L 0.01 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -L 0.01 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -L 0.01 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 50 -r -L 0.01 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -r -L 0.01 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 5 -r -L 0.001 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 10 -r -L 0.001 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 20 -r -L 0.001 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 30 -r -L 0.001 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 50 -r -L 0.001 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -r -L 0.001 -m 60')
 
+# weighted boosting FIMTDD
+# -g
+#learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 10 -c 0.01 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 15 -c 0.01 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.01 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 75 -c 0.01 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 100 -c 0.01 -e -p)) -s 1 -L 0.025')
+# -c
+#learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.1 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.01 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.001 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.5 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.005 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.075 -e -p)) -s 1 -L 0.025' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.0075 -e -p)) -s 1 -L 0.025')
 #####################################################################################################
 # Ensemble Learners
 #learners=('meta.AdaptiveRandomForest -j 10' 'meta.StreamingRandomPatches')
@@ -165,6 +202,192 @@ learners=('moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredicto
 #learners=('meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor')
 #learners=('meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor -s 30')
 #learners=('meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor' 'meta.StreamingRandomPatches -l trees.StreamingGradientTreePredictor -s 30')
+#learners=('meta.StreamingRandomPatches -s 75')
+#####################################################################################################
+# Weighted boosting
+# Weighted boosting FIMTDD configs with different LRs search with s 100 compared with s 1
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 100 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 100 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 100 -L 0.0025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 1 -L 0.025 -m 60')
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 100 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 100 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 100 -L 0.0025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 1 -L 0.025 -m 60')
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.0025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 1 -L 0.025 -m 60')
+# Weighted boosting FIMTDD configs with different LRs search with s 75 compared with s 1
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 75 -L 0.0025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.75 -e -p)) -s 1 -L 0.025 -m 60')
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 75 -L 0.0025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 50 -c 0.01 -e -p)) -s 1 -L 0.025 -m 60')
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 75 -L 0.0025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 1 -L 0.025 -m 60')
+# Weighted boosting FIMTDD configs search  with s 75 , L 0.025 compared with s 1
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.HoeffdingRegressionTree -k -v -n HoeffdingNumericAttributeClassObserver -d HoeffdingNominalAttributeClassObserver -g 25 -c 0.05)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 1 -L 0.025 -m 60')
+# Weighted boosting HTR configs search  with s 75 , L 0.025 compared with s 1
+learners=('moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.HoeffdingRegressionTree -k -v -n HoeffdingNumericAttributeClassObserver -d HoeffdingNominalAttributeClassObserver -g 25 -c 0.05)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.HoeffdingRegressionTree -k -v -n HoeffdingNumericAttributeClassObserver -d HoeffdingNominalAttributeClassObserver -g 50 -c 0.01)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.HoeffdingRegressionTree -k -v -n HoeffdingNumericAttributeClassObserver -d HoeffdingNominalAttributeClassObserver -g 25 -c 0.75)) -s 75 -L 0.025 -m 60')
+# Boosting with SGT and Weighted boosting with SGT compared with s 1
+#learners=(\
+#'trees.StreamingGradientTreePredictor' \
+#'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60' \
+#'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60' \
+#'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60' \
+#'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60' \
+#'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 1 -L 0.025 -m 60')
+
+learners=('meta.StreamingRandomPatches' \
+'trees.StreamingGradientTreePredictor' \
+'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 1 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60 -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60 -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60 -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60 -r' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60 -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60 -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60 -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60 -r' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r')
+
+learners=(\
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60 -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60 -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60 -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60 -r' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4)' \
+'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 75 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r' 'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.25 -m 60 -x (ADWINChangeDetector -a 1.0E-4) -r'\
+)
+
+
+#learners=(\
+#'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 75 -L 0.025 -m 60' \
+#'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.025 -m 60')
+
+learners=(\
+'meta.StreamingRandomPatches' \
+'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.HoeffdingRegressionTree -k -v -n HoeffdingNumericAttributeClassObserver -d HoeffdingNominalAttributeClassObserver -g 25 -c 0.05)) -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.HoeffdingRegressionTree -k -v -n HoeffdingNumericAttributeClassObserver -d HoeffdingNominalAttributeClassObserver -g 25 -c 0.05)) -s 100 -L 0.025 -m 60' \
+)
+
+learners=(\
+'meta.StreamingRandomPatches' \
+'moa.classifiers.meta.Boosting -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -w -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor)) -s 100 -L 0.025 -m 60'\
+)
+
+learners=(\
+'meta.Boosting -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -C -s 100 -L 0.025 -m 60' \
+'meta.Boosting -w -W -l (trees.BoostingTreePredictor -l trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -w -W -l (trees.BoostingTreePredictor -l trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -C -w -W -l (trees.BoostingTreePredictor -l trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60'\
+)
+
+learners=(\
+'meta.Boosting -N -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -D 0.5) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -D 0.05) -s 100 -L 0.025 -m 60' \
+'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -D 0.005) -s 100 -L 0.025 -m 60'\
+)
+
+#learners=(\
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 0.005) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 0.05) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 0.5) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 1.0) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 5.0) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 50.0) -s 100 -L 0.025 -m 60'\
+#)
+
+#learners=(\
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -Y 0.005) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -Y 0.05) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -Y 0.5) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -Y 1.0) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -Y 5.0) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -Y 50.0) -s 100 -L 0.025 -m 60'\
+#)
+
+
+#learners=(\
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 25) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 50) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 100) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 150) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 200) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 250) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -G 300) -s 100 -L 0.025 -m 60'\
+#)
+
+
+#learners=(\
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -L 1.0 -Y 5.0 -G 25) -s 100 -L 0.025 -m 60'\
+#)
+
+#learners=(\
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 50' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 70' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 80' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor) -s 100 -L 0.025 -m 100'\
+#)
+#
+#learners=(\
+#'meta.StreamingRandomPatches -m 50' \
+#'meta.StreamingRandomPatches -m 60' \
+#'meta.StreamingRandomPatches -m 70' \
+#'meta.StreamingRandomPatches -m 80' \
+#'meta.StreamingRandomPatches -m 100'\
+#)
+
+#learners=(\
+#'meta.StreamingRandomPatches' \
+#'trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -G 200' \
+#'meta.Boosting -N -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -G 200) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -G 200)) -s 100 -L 0.025 -m 60' \
+#'meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.025 -m 60' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60' \
+#)
+
+#learners=(\
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60 -G 25000 -E 5000 -B 1.0' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60 -G 25000 -E 5000 -B 5.0' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60 -G 25000 -E 5000 -B 10.0' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60 -G 25000 -E 5000 -B 15.0' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60 -G 25000 -E 5000 -B 20.0'\
+#)
+
+#learners=(\
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.1 -m 60 -D' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.075 -m 60 -D' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.05 -m 60 -D' \
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.025 -m 60 -D'\
+#)
+
+#learners=(\
+#'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.0125 -m 60' \
+#'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.0125 -m 60' \
+#'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -W 400)) -s 100 -L 0.0125 -m 60' \
+#'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (drift.DriftDetectionMethodClassifier -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -W 400) -d (DDM -n 250 -o 2.5))) -s 100 -L 0.0125 -m 60' \
+#'meta.StreamingRandomPatches'\
+#)
+
+
+learners=(\
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.0125 -m 60' \
+'meta.StreamingRandomPatches' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.0125 -m 60 -h' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -W 400)) -s 100 -L 0.0125 -m 60' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (drift.DriftDetectionMethodClassifier -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -W 400) -d (DDM -n 250 -o 2.5))) -s 100 -L 0.0125 -m 60' \
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (drift.DriftDetectionMethodClassifier -l (trees.StreamingGradientTreePredictor -D 0.05 -L 0.05 -Y 0.5 -W 400) -d (DDM -n 250 -o 2.5))) -s 100 -L 0.0125 -m 60 -h' \
+'moa.classifiers.meta.Boosting -w -W -H -s 100 -L 0.0125 -m 60'\
+)
+
+learners=(\
+'meta.AdIterVotesReader'\
+)
+
+learners=(\
+'moa.classifiers.meta.Boosting -w -W -l (trees.BoostingTreePredictor -l (trees.FIMTDD -s VarianceReductionSplitCriterion -g 25 -c 0.05 -e -p)) -s 100 -L 0.0125 -m 60' \
+)
+
 
 #####################################################################################################
 # Evaluation method
@@ -299,15 +522,17 @@ do
     in_file_desc_lines=$(grep -h -n '@data' "$in_file" | awk -F ':' '{print $1}')
     total_number_of_instances=$((in_file_lines - in_file_desc_lines -1))
 
-    out_file_post_fix=''
+    stream_dir="${dataset[$i]}"
+#    out_file_post_fix=''
     stream="-s (ArffFileStream -f $in_file)"
     max_instances=$((g_max_instances))
     sample_frequency=$((g_sample_frequency))
     if [[ $(echo "${dataset[$i]}" | grep -c 'RandomTreeGenerator\|RBF\|AGR\|LED') -gt 0 ]]; then
       if [[ $use_full_generator_for_synthetic -eq 1 || $use_scaled_generator_for_synthetic -eq 1 ]]; then
         if [ $use_scaled_generator_for_synthetic -eq 1 ]; then
-          out_file_post_fix='S10'
+#          out_file_post_fix='S10'
           temp_v_name="${dataset[$i]}_S_10"
+          stream_dir="${temp_v_name}"
           stream="${!temp_v_name}"
           max_instances=$((max_instances/10))
           total_number_of_instances=$((total_number_of_instances/10))
@@ -315,16 +540,25 @@ do
             sample_frequency=$((max_instances))
           fi
         else
-          out_file_post_fix='S'
+#          out_file_post_fix='S'
           temp_v_name="${dataset[$i]}_S"
+          stream_dir="${temp_v_name}"
           stream="${!temp_v_name}"
         fi
       fi
     else
       # not synthetic
       if [ $use_datasets_without_drifts -eq 1 ]; then
-        out_file_post_fix="${random_seed}"
+#        out_file_post_fix="${random_seed}"
+        stream_dir="${dataset[$i]}-${random_seed}"
         stream="-s (ArffFileStream -f ${dataset_dir}/${dataset[$i]}RANDOM${random_seed}.arff)"
+      else
+        echo ' trees.HoeffdingTree' | grep -c '^trees.HoeffdingTree\|trees.StreamingGradientTreePredictor'
+        if [[ $(echo "${learner}" | grep -c '^trees.HoeffdingTree\|trees.StreamingGradientTreePredictor') -gt 0 ]]; then
+          echo "Random seed change not allowed for ${learner}"
+        else
+          learner="$learner -Z ${random_seed}"
+        fi
       fi
     fi
 
@@ -335,9 +569,6 @@ do
     if [ $warmup_instances -gt 1000 ]; then
       warmup_instances=1000
     fi
-
-    out_file="${out_csv_dir}/${learner_prefix}_${dataset[$i]}${out_file_post_fix}.csv"
-    tmp_log_file="${out_csv_dir}/${learner_prefix}_${dataset[$i]}${out_file_post_fix}.log"
 
     case $learner in
     neuralNetworks.MultiMLP*)
@@ -351,6 +582,15 @@ do
         votes_file="$(find $VOTES_DIR -name *${dataset[$i]}_predictions.csv)"
         learner_command="$learner -f $votes_file"
         ;;
+    meta.AdIterVotesReader*)
+        votes_file="$(find $VOTES_DIR -name *${dataset[$i]}${random_seed}_votes.csv)"
+        learner_command="$learner -f $votes_file -S 100"
+        if [[ $(echo "${dataset[$i]}" | grep -c 'RandomTreeGenerator\|RBF\|AGR\|LED') -gt 0 ]]; then
+          adIter_learner_command_for_log="$learner ${random_seed} -s 100"
+        else
+          adIter_learner_command_for_log="$learner -s 100"
+        fi
+        ;;
 #    meta.AdaptiveRandomForest1*|meta.StreamingRandomPatches1*)
 #        learner_command="$learner -r $random_seed"
 #        ;;
@@ -358,6 +598,21 @@ do
         learner_command="$learner"
         ;;
     esac
+
+    stream_dir="${stream_dir// /_}"
+    if [ -d "${stream_dir}" ]; then
+      echo "Directory ${out_csv_dir}/${stream_dir} available"
+    else
+      mkdir -p "${out_csv_dir}/${stream_dir}"
+    fi
+
+    if [[ $(echo "$learner" | grep -c 'meta.AdIterVotesReader') -gt 0 ]]; then
+      out_file="${out_csv_dir}/${stream_dir}/${adIter_learner_command_for_log// /_}.csv"
+      tmp_log_file="${out_csv_dir}/${stream_dir}/${adIter_learner_command_for_log// /_}.log"
+    else
+      out_file="${out_csv_dir}/${stream_dir}/${learner_command// /_}.csv"
+      tmp_log_file="${out_csv_dir}/${stream_dir}/${learner_command// /_}.log"
+    fi
 
     if [ -f $out_file ]; then
       echo "$out_file already available"
@@ -376,13 +631,13 @@ do
     export "CUDA_VISIBLE_DEVICES=$GPUs_to_use"
 
     exp_cmd="moa.DoTask \"$evaluation_type -l ($learner_command) $stream -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file\" &>$tmp_log_file &"
-    echo -e "$JCMD -classpath $CLASSPATH -Xmx32g -Xms50m -Xss1g -javaagent:$JAVA_AGENT_PATH"
+    echo -e "$JCMD -classpath $CLASSPATH -Xmx56g -Xms50m -Xss1g -javaagent:$JAVA_AGENT_PATH"
     echo -e "\n$exp_cmd\n"
     echo -e "\n$exp_cmd\n" > $tmp_log_file
   #taskset -c "$CPUs_to_use"
   time "$JCMD" \
     -classpath "$CLASSPATH" \
-    -Xmx32g -Xms50m -Xss1g \
+    -Xmx56g -Xms50m -Xss1g \
     -javaagent:"$JAVA_AGENT_PATH" \
     moa.DoTask "$evaluation_type -l ($learner_command) $stream -i $max_instances -f $sample_frequency -q $sample_frequency -d $out_file" &>$tmp_log_file &
 

@@ -52,15 +52,9 @@ import moa.options.ClassOption;
 import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.FloatOption;
 import com.github.javacliparser.IntOption;
-import com.yahoo.labs.samoa.instances.Instance;
 import com.yahoo.labs.samoa.instances.MultiLabelInstance;
 import com.yahoo.labs.samoa.instances.MultiLabelPrediction;
 import com.yahoo.labs.samoa.instances.Prediction;
-import java.util.LinkedList;
-import java.util.List;
-import moa.core.Example;
-import moa.learners.Learner;
-import moa.learners.LearnerSemiSupervised;
 
 
 /**
@@ -136,9 +130,9 @@ public abstract class AMRulesMultiLabelLearnerSemiSuper extends AbstractMultiLab
 			'I', "Input attributes selector", 
 			InputAttributesSelector.class,
 			SelectAllInputs.class.getName());
-    public IntOption randomSeedOption = new IntOption("randomSeedOption",
-			'r', "randomSeedOption", 
-			1,Integer.MIN_VALUE, Integer.MAX_VALUE);	
+//    public IntOption randomSeedOption = new IntOption("randomSeedOption",
+//			'r', "randomSeedOption",
+//			1,Integer.MIN_VALUE, Integer.MAX_VALUE);
     public ClassOption featureRankingOption = new ClassOption("featureRanking",
 			'F', "Feature ranking algorithm.", 
 			FeatureRanking.class,
@@ -164,7 +158,7 @@ public abstract class AMRulesMultiLabelLearnerSemiSuper extends AbstractMultiLab
 
     public AMRulesMultiLabelLearnerSemiSuper() {
         super();
-        super.randomSeedOption=this.randomSeedOption;
+//        super.randomSeedOption=this.randomSeedOption;
         attributesPercentage=100;
     }
 

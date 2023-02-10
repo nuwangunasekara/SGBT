@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 public class StreamingGradientTreeCommittee implements Serializable, MultiOutputLearner {
 
     private static final long serialVersionUID = 8961897277670201943L;
-    protected StreamingGradientTree[] mTrees;
+    public StreamingGradientTree[] mTrees;
 
     public StreamingGradientTreeCommittee(FeatureInfo[] featureInfo, StreamingGradientTreeOptions options, int numTrees) {
         mTrees = new StreamingGradientTree[numTrees];
@@ -67,16 +67,17 @@ public class StreamingGradientTreeCommittee implements Serializable, MultiOutput
         }
     }
 
-    public void update(int[] features, GradHess[] gradHesses) {
+    public void update(int[] features, GradHess[] gradHesses, Double weights[]) {
         IntStream.range(0, mTrees.length)
                  .parallel()
-                 .forEach(i -> mTrees[i].update(features, gradHesses[i]));
+                 .forEach(i -> mTrees[i].update(features, gradHesses[i], weights[i]));
     }
 
     public double[] predict(int[] features) {
-        return IntStream.range(0, mTrees.length)
+        double[] v = new double[mTrees.length];
+        IntStream.range(0, mTrees.length)
                         .parallel()
-                        .mapToDouble(i -> mTrees[i].predict(features))
-                        .toArray();
+                        .forEach(i -> v[i] = mTrees[i].predict(features));
+        return v;
     }
 }

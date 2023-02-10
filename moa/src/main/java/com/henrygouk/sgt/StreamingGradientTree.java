@@ -78,9 +78,9 @@ public class StreamingGradientTree implements Serializable {
         }
     }
 
-    public void update(int[] features, GradHess gradHess) {
+    public void update(int[] features, GradHess gradHess, Double weight) {
         Node leaf = mRoot.getLeaf(features);
-        leaf.update(features, gradHess);
+        leaf.update(features, gradHess, weight);
 
         if(leaf.mInstances % mOptions.gracePeriod != 0) {
             return;
@@ -202,7 +202,7 @@ public class StreamingGradientTree implements Serializable {
             }
         }
 
-        void update(int[] features, GradHess gradHess) {
+        void update(int[] features, GradHess gradHess, Double weight) {
             mInstances++;
 
             for(int i = 0; i < features.length; i++) {
@@ -210,10 +210,10 @@ public class StreamingGradientTree implements Serializable {
                     continue;
                 }
 
-                mSplitStats[i][features[i]].addObservation(gradHess);
+                mSplitStats[i][features[i]].addObservation(gradHess, weight);
             }
 
-            mUpdateStats.addObservation(gradHess);
+            mUpdateStats.addObservation(gradHess, weight);
         }
 
         public double predict() {

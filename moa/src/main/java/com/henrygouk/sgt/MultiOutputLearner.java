@@ -16,7 +16,7 @@ public interface MultiOutputLearner {
 
     public void randomlyInitialize(Random rng, double predBound);
 
-    public void update(int[] features, GradHess[] gradHess);
+    public void update(int[] features, GradHess[] gradHess, Double[] weights);
 
     public double[] predict(int[] features);
 }

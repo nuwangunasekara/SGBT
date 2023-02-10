@@ -157,13 +157,27 @@ public class BasicClassificationPerformanceEvaluator extends AbstractOptionHandl
     }
 
     @Override
-    public Measurement[] getPerformanceMeasurements() {
+    public Measurement[] getPerformanceMeasurements(){
+        return getPerformanceMeasurements(false);
+    }
+
+    @Override
+    public Measurement[] getPerformanceMeasurements(boolean printStats) {
         ArrayList<Measurement> measurements = new ArrayList<Measurement>();
-        measurements.add(new Measurement("classified instances", this.getTotalWeightObserved()));
-        measurements.add(new Measurement("classifications correct (percent)", this.getFractionCorrectlyClassified() * 100.0));
-        measurements.add(new Measurement("Kappa Statistic (percent)", this.getKappaStatistic() * 100.0));
-        measurements.add(new Measurement("Kappa Temporal Statistic (percent)", this.getKappaTemporalStatistic() * 100.0));
-        measurements.add(new Measurement("Kappa M Statistic (percent)", this.getKappaMStatistic() * 100.0));
+        double classifiedInstances = this.getTotalWeightObserved();
+        double classificationsCorrect = this.getFractionCorrectlyClassified() * 100.0;
+        double kappaStatistic = this.getKappaStatistic() * 100.0;
+        double kappaTemporalStatistic = this.getKappaTemporalStatistic() * 100.0;
+        double kappaMStatistic = this.getKappaMStatistic() * 100.0;
+        if (printStats) {
+            System.out.println("classified instances,classifications correct (percent),Kappa Statistic (percent),Kappa Temporal Statistic (percent),Kappa M Statistic (percent)");
+            System.out.println(""+classifiedInstances+","+classificationsCorrect+","+kappaStatistic+","+kappaTemporalStatistic+","+kappaMStatistic);
+        }
+        measurements.add(new Measurement("classified instances", classifiedInstances));
+        measurements.add(new Measurement("classifications correct (percent)", classificationsCorrect));
+        measurements.add(new Measurement("Kappa Statistic (percent)", kappaStatistic));
+        measurements.add(new Measurement("Kappa Temporal Statistic (percent)", kappaTemporalStatistic));
+        measurements.add(new Measurement("Kappa M Statistic (percent)", kappaMStatistic));
         if (precisionRecallOutputOption.isSet()) 
             measurements.add(new Measurement("F1 Score (percent)", 
                     this.getF1Statistic() * 100.0));

@@ -387,6 +387,12 @@ public class BasicAUCImbalancedPerformanceEvaluator extends AbstractOptionHandle
 		}
 	}
 
+
+	@Override
+	public Measurement[] getPerformanceMeasurements(boolean printStats){
+		return getPerformanceMeasurements();
+	}
+
 	@Override
 	public Measurement[] getPerformanceMeasurements() {
 		return new Measurement[] { new Measurement("classified instances", this.totalObservedInstances),

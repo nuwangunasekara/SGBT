@@ -119,6 +119,12 @@ public class BasicConceptDriftPerformanceEvaluator extends AbstractMOAObject
         }
     }
 
+
+    @Override
+    public Measurement[] getPerformanceMeasurements(boolean printStats){
+        return getPerformanceMeasurements();
+    }
+
     @Override
     public Measurement[] getPerformanceMeasurements() {
         Measurement[] measurement;

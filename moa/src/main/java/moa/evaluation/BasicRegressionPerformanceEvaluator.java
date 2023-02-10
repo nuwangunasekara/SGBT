@@ -80,6 +80,11 @@ public class BasicRegressionPerformanceEvaluator extends AbstractMOAObject
     }
 
     @Override
+    public Measurement[] getPerformanceMeasurements(boolean printStats){
+        return getPerformanceMeasurements();
+    }
+
+    @Override
     public Measurement[] getPerformanceMeasurements() {
         return new Measurement[]{
                     new Measurement("classified instances",

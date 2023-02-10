@@ -18,6 +18,7 @@
  */
 package moa.classifiers.drift;
 
+import com.yahoo.labs.samoa.instances.Attribute;
 import com.yahoo.labs.samoa.instances.Instance;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +76,11 @@ public class DriftDetectionMethodClassifier extends AbstractClassifier implement
 
     protected int ddmLevel;
 
+    protected int examplesSeenSinceLastWarningInThisDrift = 0;
+    protected double examplesSeen = 0.0;
+    protected double sumOfValues = 0.0;
+    protected double sumOfSquares = 0.0;
+
     public boolean isWarningDetected() {
         return (this.ddmLevel == DDM_WARNING_LEVEL);
     }
@@ -92,10 +98,13 @@ public class DriftDetectionMethodClassifier extends AbstractClassifier implement
     @Override
     public void resetLearningImpl() {
         this.classifier = ((Classifier) getPreparedClassOption(this.baseLearnerOption)).copy();
+        System.gc();
         this.newclassifier = this.classifier.copy();
+        System.gc();
         this.classifier.resetLearning();
         this.newclassifier.resetLearning();
         this.driftDetectionMethod = ((ChangeDetector) getPreparedClassOption(this.driftDetectionMethodOption)).copy();
+        System.gc();
         this.newClassifierReset = false;
     }
 
@@ -103,21 +112,60 @@ public class DriftDetectionMethodClassifier extends AbstractClassifier implement
 
     protected int warningDetected = 0;
 
+    public double normalizeTargetValue(double value) {
+        if (examplesSeen > 1) {
+            double sd = Math.sqrt((sumOfSquares - ((sumOfValues * sumOfValues)/examplesSeen))/examplesSeen);
+            double average = sumOfValues / examplesSeen;
+            if (sd > 0 && examplesSeen > 1)
+                return (value - average) / (3 * sd);
+            else
+                return 0.0;
+        }
+        return 0.0;
+    }
+
+    public double getNormalizedError(Instance inst, double prediction) {
+        double normalPrediction = normalizeTargetValue(prediction);
+        double normalValue = normalizeTargetValue(inst.classValue());
+        return Math.abs(normalValue - normalPrediction);
+    }
+
     @Override
     public void trainOnInstanceImpl(Instance inst) {
         //this.numberInstances++;
-        int trueClass = (int) inst.classValue();
-        boolean prediction;
-        if (Utils.maxIndex(this.classifier.getVotesForInstance(inst)) == trueClass) {
-            prediction = true;
-        } else {
-            prediction = false;
+
+        Attribute target = inst.classAttribute();
+        double input = 0.0;
+        double [] votes = this.classifier.getVotesForInstance(inst);
+        if (target.isNominal()) {
+            int trueClass = (int) inst.classValue();
+            boolean prediction;
+            if (Utils.maxIndex(votes) == trueClass) {
+                prediction = true;
+            } else {
+                prediction = false;
+            }
+            input = prediction ? 0.0 : 1.0;
+        }else{
+            examplesSeenSinceLastWarningInThisDrift++;
+            examplesSeen += inst.weight();
+            sumOfValues += inst.weight() * inst.classValue();
+            sumOfSquares += inst.weight() * inst.classValue() * inst.classValue();
+            input = getNormalizedError(inst, votes[0]);
         }
-        //this.ddmLevel = this.driftDetectionMethod.computeNextVal(prediction);
-        this.driftDetectionMethod.input(prediction ? 0.0 : 1.0);
+        double previousEstimation = this.driftDetectionMethod.getEstimation();
+        this.driftDetectionMethod.input(input);
+        double currentEstimation = this.driftDetectionMethod.getEstimation();
+
         this.ddmLevel = DDM_INCONTROL_LEVEL;
         if (this.driftDetectionMethod.getChange()) {
-         this.ddmLevel =  DDM_OUTCONTROL_LEVEL;
+            if (target.isNominal()){
+                this.ddmLevel =  DDM_OUTCONTROL_LEVEL;
+            }else{
+                if(currentEstimation > previousEstimation){ // currentErrorEstimation > previousErrorEstimation
+                    this.ddmLevel =  DDM_OUTCONTROL_LEVEL;
+                }
+            }
         }
         if (this.driftDetectionMethod.getWarningZone()) {
            this.ddmLevel =  DDM_WARNING_LEVEL;
@@ -128,8 +176,10 @@ public class DriftDetectionMethodClassifier extends AbstractClassifier implement
             	//System.out.println("DDM_WARNING_LEVEL");
                 if (newClassifierReset == true) {
                     this.warningDetected++;
+                    System.out.println("DDM_WARNING_LEVEL Reset alternate classifier As previous instance was in DDM_INCONTROL_LEVEL. "+ examplesSeen +"  " + examplesSeenSinceLastWarningInThisDrift);
                     this.newclassifier.resetLearning();
                     newClassifierReset = false;
+                    examplesSeenSinceLastWarningInThisDrift = 0;
                 }
                 this.newclassifier.trainOnInstance(inst);
                 break;
@@ -139,12 +189,18 @@ public class DriftDetectionMethodClassifier extends AbstractClassifier implement
             	//System.out.println("DDM_OUTCONTROL_LEVEL");
                 this.changeDetected++;
                 this.classifier = null;
+                System.gc();
+                System.out.println("DDM_OUTCONTROL_LEVEL Using alternate classifier. "+ examplesSeen + " examplesSeenSinceLastWarningInThisDrift " +examplesSeenSinceLastWarningInThisDrift);
                 this.classifier = this.newclassifier;
                 if (this.classifier instanceof WEKAClassifier) {
                     ((WEKAClassifier) this.classifier).buildClassifier();
                 }
                 this.newclassifier = ((Classifier) getPreparedClassOption(this.baseLearnerOption)).copy();
+                System.gc();
                 this.newclassifier.resetLearning();
+                this.examplesSeen = 0.0;
+                this.sumOfValues = 0.0;
+                this.sumOfSquares = 0.0;
                 break;
 
             case DDM_INCONTROL_LEVEL:

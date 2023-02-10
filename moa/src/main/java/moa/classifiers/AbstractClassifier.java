@@ -50,6 +50,7 @@ import com.yahoo.labs.samoa.instances.MultiLabelPrediction;
 import com.yahoo.labs.samoa.instances.Prediction;
 
 import moa.core.Utils;
+import org.openjdk.jol.info.GraphLayout;
 
 public abstract class AbstractClassifier extends AbstractOptionHandler
         implements Classifier, CapabilitiesHandler { //Learner<Example<Instance>> {
@@ -69,7 +70,7 @@ public abstract class AbstractClassifier extends AbstractOptionHandler
     protected int randomSeed = 1;
 
     /** Option for randomizable learners to change the random seed */
-    protected IntOption randomSeedOption;
+    public IntOption randomSeedOption;
 
     /** Random Generator used in randomizable learners  */
     public Random classifierRandom;
@@ -80,7 +81,7 @@ public abstract class AbstractClassifier extends AbstractOptionHandler
      */
     public AbstractClassifier() {
         if (isRandomizable()) {
-            this.randomSeedOption = new IntOption("randomSeed", 'r',
+            this.randomSeedOption = new IntOption("randomSeed", 'Z',
                     "Seed for random behaviour of the classifier.", 1);
         }
     }
@@ -181,11 +182,19 @@ public abstract class AbstractClassifier extends AbstractOptionHandler
 
     @Override
     public Measurement[] getModelMeasurements() {
+        System.gc();
+//        double modelMeasureByteSize =  measureByteSize();
+        double modelMeasureByteSize = GraphLayout.parseInstance(this).totalSize();
+        return getModelMeasurements(modelMeasureByteSize);
+    }
+
+    @Override
+    public Measurement[] getModelMeasurements(double modelMeasureByteSize) {
         List<Measurement> measurementList = new LinkedList<Measurement>();
         measurementList.add(new Measurement("model training instances",
                 trainingWeightSeenByModel()));
         measurementList.add(new Measurement("model serialized size (bytes)",
-                measureByteSize()));
+                modelMeasureByteSize));
         Measurement[] modelMeasurements = getModelMeasurementsImpl();
         if (modelMeasurements != null) {
             measurementList.addAll(Arrays.asList(modelMeasurements));

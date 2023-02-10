@@ -101,6 +101,7 @@ public interface Learner<E extends Example> extends MOAObject, OptionHandler, AW
      * @return an array of measurements to be used in evaluation tasks
      */
     public Measurement[] getModelMeasurements();
+    public Measurement[] getModelMeasurements(double modelMeasureByteSize);
 
     /**
      * Gets the learners of this ensemble.

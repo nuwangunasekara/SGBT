@@ -7,7 +7,7 @@ public class BinaryCrossEntropy extends Objective implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GradHess[] computeDerivatives(double[] groundTruth, double[] raw) {
+    public GradHess[] computeDerivatives(double[] groundTruth, double[] raw, boolean computeNegativeResidual, boolean clipPredictions) {
         GradHess[] result = new GradHess[raw.length];
         double[] predictions = transfer(raw);
 
