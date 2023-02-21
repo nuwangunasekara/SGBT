@@ -2,6 +2,7 @@ package com.henrygouk.sgt;
 
 public abstract class Objective {
 //    double[] predictions;
+    public double lossForAllClasses = 0.0;
     public abstract GradHess[] computeDerivatives(double[] groundTruth, double[] raw, boolean computeNegativeResidual, boolean clipPredictions);
 
     public double[] transfer(double[] raw) {

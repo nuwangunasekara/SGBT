@@ -80,9 +80,9 @@ fi
 JAR_PATHS="$(find $MAVEN_REPO -name '*moa-*SNAPSHOT.jar'| grep -v 'kafka')"
 JAR_PATHS="$(for j in $(find ${MAVEN_REPO} -name '*.jar'| grep -v 'moa');do printf '%s:' $j; done)$JAR_PATHS"
 CLASSPATH="$JAR_PATHS"
-echo"$CLASSPATH"
+echo "CLASSPATH: $CLASSPATH"
 JAVA_AGENT_PATH="$(find $MAVEN_REPO -name 'sizeofag-1.0.4.jar')"
-
+echo "JAVA_AGENT_PATH: $JAVA_AGENT_PATH"
 
 JCMD=java
 if [ -f "$JAVA_HOME/bin/java" ]
@@ -91,14 +91,14 @@ then
   JCMD="$JAVA_HOME/bin/java"
 fi
 
-port_no='8081'
-host_ip="$(hostname).$(dnsdomainname)"
+#port_no='8081'
+#host_ip="$(hostname).$(dnsdomainname)"
 #jmx_string="-Dcom.sun.management.jmxremote.port=${port_no} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=${host_ip}"
 
 $JCMD -version
 
 # check options
-MEMORY=512m
+MEMORY=2048m
 MAIN=moa.gui.GUI
 # launch class
 #  -Dcom.sun.management.jmxremote.port="$port_no" -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false \

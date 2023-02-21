@@ -5,6 +5,7 @@ import com.yahoo.labs.samoa.instances.Instance;
 import moa.capabilities.Capability;
 import moa.capabilities.ImmutableCapabilities;
 import moa.classifiers.*;
+import moa.classifiers.core.driftdetection.ADWIN;
 import moa.core.Measurement;
 import moa.options.ClassOption;
 
@@ -14,6 +15,10 @@ import java.util.HashMap;
 import java.util.stream.IntStream;
 
 import moa.classifiers.Classifier;
+import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.vm.VM;
+
+import static moa.core.Measurement.getMeasurementNamed;
 
 class TreeCommittee implements Serializable{
 
@@ -156,7 +161,28 @@ public ClassOption baseLearnerOption = new ClassOption("baseLearner", 'l',
 
     @Override
     public long measureByteSize() {
-        return 0;
+        long b = 0;
+        // get shallow size of this
+        b = VM.current().sizeOf(this);
+        if ((treeCommittee!= null) && (treeCommittee.treesCommittee != null)){
+
+            long[] byteSize = new long[treeCommittee.treesCommittee.length];
+            // get deep size of each item
+            if (treeCommittee.treesCommittee.length == 1) {
+                IntStream.range(0, treeCommittee.treesCommittee.length)
+                        .forEach(i -> byteSize[i] = treeCommittee.treesCommittee[i].measureByteSize());
+//                        .forEach(i -> byteSize[i] = GraphLayout.parseInstance(treeCommittee.treesCommittee[i]).totalSize());
+            }else{
+                IntStream.range(0, treeCommittee.treesCommittee.length)
+                        .parallel()
+                        .forEach(i -> byteSize[i] = treeCommittee.treesCommittee[i].measureByteSize());
+//                        .forEach(i -> byteSize[i] = GraphLayout.parseInstance(treeCommittee.treesCommittee[i]).totalSize());
+            }
+            for (int i = 0; i < treeCommittee.treesCommittee.length; i++) {
+                b += byteSize[i];
+            }
+        }
+        return b;
     }
 
     protected TreeCommittee createTrees(Classifier baseLearner, int numOutputs) {
@@ -255,9 +281,73 @@ public ClassOption baseLearnerOption = new ClassOption("baseLearner", 'l',
     public void getModelDescription(StringBuilder in, int indent) {
     }
 
+    static Measurement[] getTreeInfo(Classifier c){
+        long n = 0;
+        long splitsByConfidence = 0;
+        long splitsByHBound = 0;
+        long splitsByHBoundSmallerThanTieThreshold = 0;
+        long totalSplits = 0;
+        char treeType = 'U';
+        if (c instanceof HoeffdingTree){
+            n = ((HoeffdingTree)c).activeLeafNodeCount;
+            treeType = 'H';
+        }else if (c instanceof FIMTDD){
+            n = ((FIMTDD)c).leafNodeCount;
+            splitsByConfidence = ((FIMTDD)c).splitsByConfidence;
+            splitsByHBound = ((FIMTDD)c).splitsByHBound;
+            splitsByHBoundSmallerThanTieThreshold = ((FIMTDD)c).splitsByHBoundSmallerThanTieThreshold;
+            totalSplits = ((FIMTDD)c).splitNodeCount;
+            treeType = 'F';
+        } else if (c instanceof StreamingGradientTreePredictor){
+            n = ((StreamingGradientTreePredictor)c).mTrees != null ?
+                    ((StreamingGradientTreePredictor)c).mTrees.getNumNodes(): 0;
+            treeType = 'S';
+        }
+
+        return new Measurement[]{
+                new Measurement("treeType", treeType),
+                new Measurement("numNodes", n),
+                new Measurement("splitsByConfidence", splitsByConfidence),
+                new Measurement("splitsByHBound", splitsByHBound),
+                new Measurement("splitsByHBoundSmallerThanTieThreshold", splitsByHBoundSmallerThanTieThreshold),
+                new Measurement("totalSplits", totalSplits)
+        };
+    }
     @Override
     public Measurement[] getModelMeasurementsImpl() {
-        return null;
+        double avgNumNodes = 0.0;
+        double avgSplitsByConfidence = 0.0;
+        double avgSplitsByHBound = 0.0;
+        double avgSplitsByHBoundSmallerThanTieThreshold = 0.0;
+        double avgTotalSplits = 0.0;
+        if (treeCommittee.treesCommittee != null) {
+            Measurement[][] m = new Measurement[treeCommittee.treesCommittee.length][];
+            IntStream.range(0, treeCommittee.treesCommittee.length)
+                    .parallel()
+                    .forEach(i -> m[i] = getTreeInfo(treeCommittee.treesCommittee[i]));
+
+            for (int i = 0; i < treeCommittee.treesCommittee.length; i++) {
+                avgNumNodes += getMeasurementNamed("numNodes", m[i]).getValue();
+                avgSplitsByConfidence += getMeasurementNamed("splitsByConfidence", m[i]).getValue();
+                avgSplitsByHBound += getMeasurementNamed("splitsByHBound", m[i]).getValue();
+                avgSplitsByHBoundSmallerThanTieThreshold += getMeasurementNamed("splitsByHBoundSmallerThanTieThreshold", m[i]).getValue();
+                avgTotalSplits += getMeasurementNamed("totalSplits", m[i]).getValue();
+            }
+
+            avgNumNodes /= (1.0 * treeCommittee.treesCommittee.length);
+            avgSplitsByConfidence /= (1.0 * treeCommittee.treesCommittee.length);
+            avgSplitsByHBound /= (1.0 * treeCommittee.treesCommittee.length);
+            avgSplitsByHBoundSmallerThanTieThreshold /= (1.0 * treeCommittee.treesCommittee.length);
+            avgTotalSplits /= (1.0 * treeCommittee.treesCommittee.length);
+        }
+
+        return new Measurement[]{
+                new Measurement("avgNumNodes", avgNumNodes),
+                new Measurement("avgSplitsByConfidence", avgSplitsByConfidence),
+                new Measurement("avgSplitsByHBound", avgSplitsByHBound),
+                new Measurement("avgSplitsByHBoundSmallerThanTieThreshold", avgSplitsByHBoundSmallerThanTieThreshold),
+                new Measurement("avgTotalSplits", avgTotalSplits)
+        };
     }
 
     @Override

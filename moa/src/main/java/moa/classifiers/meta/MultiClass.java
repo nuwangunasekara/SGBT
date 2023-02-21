@@ -33,6 +33,8 @@ import moa.core.ObjectRepository;
 import moa.core.Utils;
 import moa.options.ClassOption;
 import moa.tasks.TaskMonitor;
+import org.openjdk.jol.info.GraphLayout;
+import org.openjdk.jol.vm.VM;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -253,7 +255,7 @@ public class MultiClass extends AbstractClassifier  implements MultiClassClassif
     }
     static Measurement[] getModelMeasurementsS (
             Classifier c){
-        return c.getModelMeasurements();
+        return c.getModelMeasurements(0.0);
     }
     @Override
     protected Measurement[] getModelMeasurementsImpl() {
@@ -263,17 +265,8 @@ public class MultiClass extends AbstractClassifier  implements MultiClassClassif
         double avgSplitsByHBound = 0.0;
         double avgSplitsByHBoundSmallerThanTieThreshold = 0.0;
         double avgTotalSplits = 0.0;
+        double avgSkipCount = 0.0;
         if (treesCommittee != null) {
-            double committeeSize = 1.0;
-//                for (int i = 0; i < treesCommittee.length; i++) {
-//                    Measurement[] modelMesurements = treesCommittee[i].getModelMeasurements();
-//                    avgNumNodes += getMeasurementNamed("avgNumNodes", modelMesurements).getValue();
-//                    avgSplitsByConfidence += getMeasurementNamed("avgSplitsByConfidence", modelMesurements).getValue();
-//                    avgSplitsByHBound += getMeasurementNamed("avgSplitsByHBound", modelMesurements).getValue();
-//                    avgSplitsByHBoundSmallerThanTieThreshold += getMeasurementNamed("avgSplitsByHBoundSmallerThanTieThreshold", modelMesurements).getValue();
-//                    avgTotalSplits += getMeasurementNamed("avgTotalSplits", modelMesurements).getValue();
-//                }
-
             Measurement[][] m = new Measurement[treesCommittee.length][];
             IntStream.range(0, treesCommittee.length)
                     .parallel()
@@ -285,13 +278,15 @@ public class MultiClass extends AbstractClassifier  implements MultiClassClassif
                 avgSplitsByHBound += getMeasurementNamed("avgSplitsByHBound", m[i]).getValue();
                 avgSplitsByHBoundSmallerThanTieThreshold += getMeasurementNamed("avgSplitsByHBoundSmallerThanTieThreshold", m[i]).getValue();
                 avgTotalSplits += getMeasurementNamed("avgTotalSplits", m[i]).getValue();
+                avgSkipCount += getMeasurementNamed("skipCount", m[i]).getValue();
             }
 
-            avgNumNodes /= (committeeSize * treesCommittee.length);
-            avgSplitsByConfidence /= (committeeSize * treesCommittee.length);
-            avgSplitsByHBound /= (committeeSize * treesCommittee.length);
-            avgSplitsByHBoundSmallerThanTieThreshold /= (committeeSize * treesCommittee.length);
-            avgTotalSplits /= (committeeSize * treesCommittee.length);
+            avgNumNodes /= (1.0 * treesCommittee.length);
+            avgSplitsByConfidence /= (1.0 * treesCommittee.length);
+            avgSplitsByHBound /= (1.0 * treesCommittee.length);
+            avgSplitsByHBoundSmallerThanTieThreshold /= (1.0 * treesCommittee.length);
+            avgTotalSplits /= (1.0 * treesCommittee.length);
+            avgSkipCount /= (1.0 * treesCommittee.length);
         }
 
         return new Measurement[]{
@@ -299,8 +294,33 @@ public class MultiClass extends AbstractClassifier  implements MultiClassClassif
                 new Measurement("avgSplitsByConfidence", avgSplitsByConfidence),
                 new Measurement("avgSplitsByHBound", avgSplitsByHBound),
                 new Measurement("avgSplitsByHBoundSmallerThanTieThreshold", avgSplitsByHBoundSmallerThanTieThreshold),
-                new Measurement("avgTotalSplits", avgTotalSplits)
+                new Measurement("avgTotalSplits", avgTotalSplits),
+                new Measurement("avgSkipCount", avgSkipCount)
         };
+    }
+
+    @Override
+    public long measureByteSize() {
+        long b = 0;
+        // get shallow size of this
+        b = VM.current().sizeOf(this);
+
+        if (treesCommittee != null) {
+            long[] byteSize = new long[treesCommittee.length];
+            // get deep size of each item
+            if (treesCommittee.length == 1) {
+                IntStream.range(0, treesCommittee.length)
+                        .forEach(i -> byteSize[i] = treesCommittee[i].measureByteSize());
+            }else{
+                IntStream.range(0, treesCommittee.length)
+                        .parallel()
+                        .forEach(i -> byteSize[i] = treesCommittee[i].measureByteSize());
+            }
+            for (int i = 0; i < treesCommittee.length; i++) {
+                b += byteSize[i];
+            }
+        }
+        return b;
     }
 
     @Override

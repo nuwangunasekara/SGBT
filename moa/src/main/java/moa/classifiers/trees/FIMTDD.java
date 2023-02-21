@@ -43,6 +43,7 @@ import moa.core.DoubleVector;
 import moa.core.Measurement;
 import moa.core.SizeOf;
 import moa.core.StringUtils;
+import org.openjdk.jol.info.GraphLayout;
 
 /**
  * Implementation of FIMTDD, regression and model trees for data streams.
@@ -710,8 +711,14 @@ public class FIMTDD extends AbstractClassifier implements Regressor {
 		};
 	}
 
-	public int calcByteSize() {
+	public long calcByteSize() {
 		return (int) SizeOf.fullSizeOf(this);
+//		return GraphLayout.parseInstance(this).totalSize();
+	}
+
+	@Override
+	public long measureByteSize() {
+		return calcByteSize();
 	}
 
 	public double[] getVotesForInstance(Instance inst) {

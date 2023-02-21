@@ -178,8 +178,8 @@ public class EvaluateInterleavedTestThenTrain extends ClassificationMainTask {
                     long t1 = 0;
                     long t2 = 0;
                     t1 = System.currentTimeMillis();
-//                    modelMeasureByteSize = learner.measureByteSize();
-                    modelMeasureByteSize = GraphLayout.parseInstance(learner).totalSize();
+                    modelMeasureByteSize = learner.measureByteSize();
+//                    modelMeasureByteSize = GraphLayout.parseInstance(learner).totalSize();
                     t2 = System.currentTimeMillis();
                     timeTakenBymeasureByteSize = (t2 - t1) / 1000F;
 

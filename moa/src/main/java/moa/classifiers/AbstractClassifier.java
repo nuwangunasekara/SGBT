@@ -183,8 +183,8 @@ public abstract class AbstractClassifier extends AbstractOptionHandler
     @Override
     public Measurement[] getModelMeasurements() {
         System.gc();
-//        double modelMeasureByteSize =  measureByteSize();
-        double modelMeasureByteSize = GraphLayout.parseInstance(this).totalSize();
+        double modelMeasureByteSize =  measureByteSize();
+//        double modelMeasureByteSize = GraphLayout.parseInstance(this).totalSize();
         return getModelMeasurements(modelMeasureByteSize);
     }
 

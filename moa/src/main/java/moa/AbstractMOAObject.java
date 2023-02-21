@@ -21,6 +21,7 @@ package moa;
 
 import moa.core.SerializeUtils;
 import moa.core.SizeOf;
+import org.openjdk.jol.info.GraphLayout;
 
 /**
  * Abstract MOA Object. All classes that are serializable, copiable,
@@ -75,5 +76,6 @@ public abstract class AbstractMOAObject implements MOAObject {
      */
     public static long measureByteSize(MOAObject obj) {
         return (long) SizeOf.fullSizeOf(obj);
+//        return GraphLayout.parseInstance(obj).totalSize();
     }
 }

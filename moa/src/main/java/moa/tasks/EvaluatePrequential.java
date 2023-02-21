@@ -224,8 +224,8 @@ public class EvaluatePrequential extends ClassificationMainTask implements Capab
                     long t1 = 0;
                     long t2 = 0;
                     t1 = System.currentTimeMillis();
-//                    modelMeasureByteSize = learner.measureByteSize();
-                    modelMeasureByteSize = GraphLayout.parseInstance(learner).totalSize();
+                    modelMeasureByteSize = learner.measureByteSize();
+//                    modelMeasureByteSize = GraphLayout.parseInstance(learner).totalSize();
                     RAMHoursIncrement = modelMeasureByteSize / (1024.0 * 1024.0 * 1024.0); //GBs
                     t2 = System.currentTimeMillis();
                     timeTakenBymeasureByteSize = (t2 - t1) / 1000F;

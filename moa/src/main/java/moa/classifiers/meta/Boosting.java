@@ -31,20 +31,20 @@ import com.yahoo.labs.samoa.instances.Instances;
 import moa.capabilities.Capability;
 import moa.capabilities.ImmutableCapabilities;
 import moa.classifiers.*;
+import moa.classifiers.core.driftdetection.ADWIN;
 import moa.core.DoubleVector;
 import moa.core.Measurement;
 import moa.core.ObjectRepository;
 import moa.core.Utils;
 import moa.options.ClassOption;
 import moa.tasks.TaskMonitor;
+import org.openjdk.jol.vm.VM;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.stream.IntStream;
+
+import static moa.core.Measurement.getMeasurementNamed;
 
 public class Boosting extends AbstractClassifier implements MultiClassClassifier {
 
@@ -70,6 +70,8 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
             "Multiply Hessian for Multiple iteration by Hessian Ceilling.", 1, 1, 100);
 
     public FlagOption useWeightOf1 = new FlagOption("useWeightOf1", 'W', "Use weight of 1.0 (do not use hessian as weights for instances). Used with -w");
+
+    public FlagOption skipOnLossLessThan3SD = new FlagOption("skipOnLoss3SD", 'k', "skip on loss < 3 SD");
 
     public FlagOption useHeterogeneousEnsemble = new FlagOption("heterogeneousEnsemble", 'H', "Heterogeneous ensemble");
     public FlagOption useOneHotEncoding = new FlagOption("useOneHotEncoding", 'h', "useOneHotEncoding");
@@ -132,6 +134,9 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
 
     protected ArrayList<BoostingCommittee> booster;
 
+    protected ADWIN lossEstimator;
+    protected double skipCount = 0.0;
+
     protected BoostingCommittee baseLearner;
     private int committeeSize;
 
@@ -156,6 +161,9 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
             }
             this.booster = null;
         }
+
+        lossEstimator = null;
+
         if(this.subSpacesForEachBoostingIteration != null){
             while (this.subSpacesForEachBoostingIteration.size() > 0) {
                 this.subSpacesForEachBoostingIteration.remove(0);
@@ -347,6 +355,11 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         }
         System.out.println("CommitteeSize: " + committeeSize);
 
+        if (lossEstimator != null){
+            lossEstimator = null;
+        }
+        lossEstimator = new ADWIN(1.0E-3);
+
         baseLearnerIndex = this.classifierRandom.ints(0, baseLearnerArray.size()).limit(numberOfboostingIterations.getValue()).toArray();
         for (int i = 0; i< numberOfboostingIterations.getValue(); i ++) {
             if (useGradientOverHessianLabels.isSet() && useHeterogeneousEnsemble.isSet()){
@@ -478,6 +491,7 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         }
         // get initial score, this is 0.0 for all the trees in the committee
         DoubleVector rawScore = new DoubleVector(BoostingCommittee.getScoresWhenNullTree(committeeSize));
+        double loss = 0.0;
         for (int m = 0; m < booster.size(); m++) {
             Instance subInstance;
             // compute Derivatives (g and h) using y and summed up raw score, for all the trees in the committee
@@ -487,6 +501,19 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
 
             // at m th iteration, gets the adjustment by the m th committee considering all the previous adjustments
             GradHess[] gradHess = mObjective.computeDerivatives(groundTruth, rawScore.getArrayRef(), computeNegativeResidual.isSet(), clipPredictions.isSet());
+            loss += mObjective.lossForAllClasses;
+            boolean skipTrain = false;
+            if (skipOnLossLessThan3SD.isSet() && (m == 0)){
+                double sd = Math.sqrt(lossEstimator.getVariance());
+                if (mObjective.lossForAllClasses < ( lossEstimator.getEstimation() - ( 3 * sd) ) ) {
+                    System.out.println(mObjective.lossForAllClasses + "," + lossEstimator.getEstimation() + "," + sd);
+                    skipTrain = true;
+                }
+            }
+            if (skipTrain == true) {
+                skipCount += 1.0;
+                break;
+            }
 
 //            loss += mObjective.loss(groundTruth);
 //            loss = (new SquaredError()).loss(groundTruth, rawScore.getArrayRef());
@@ -562,6 +589,7 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
             // add the current sore to existing raw score
             rawScore.addValues(currentScore);
         }
+        lossEstimator.setInput(loss);
     }
 
     @Override
@@ -638,45 +666,71 @@ public class Boosting extends AbstractClassifier implements MultiClassClassifier
         // TODO Auto-generated method stub
     }
 
+    static Measurement[] getModelMeasurementsS (
+            Classifier c){
+        return c.getModelMeasurements(0.0);
+    }
     @Override
     protected Measurement[] getModelMeasurementsImpl() {
-        System.out.println(instancesSeenAtTrain + " since reset " + instancesSeenAtTrainSinceReset);
+
         double avgNumNodes = 0.0;
         double avgSplitsByConfidence = 0.0;
         double avgSplitsByHBound = 0.0;
         double avgSplitsByHBoundSmallerThanTieThreshold = 0.0;
         double avgTotalSplits = 0.0;
         if (booster != null) {
-            double committeeSize = 1.0;
-            for (int i = 0; i < booster.size(); i++) {
-//                sizeString += new String(new char[n]).replace("\0", s); // put n s into sizeString
-                System.out.println("  " + i + " " + booster.get(i).getCommitteeInfo());
-                ArrayList<ArrayList<HashMap<String,String>>> committeeInfo = booster.get(i).getCommitteeInfo();
-//                double avgNumNodes = 0.0;
-                committeeSize = committeeInfo.size();
-                for (int j = 0; j < committeeInfo.size(); j++){
-                    avgNumNodes += Integer.parseInt(committeeInfo.get(j).get(0).get("numNodes"));
-                    avgSplitsByConfidence += Integer.parseInt(committeeInfo.get(j).get(0).get("splitsByConfidence"));
-                    avgSplitsByHBound += Integer.parseInt(committeeInfo.get(j).get(0).get("splitsByHBound"));
-                    avgSplitsByHBoundSmallerThanTieThreshold += Integer.parseInt(committeeInfo.get(j).get(0).get("splitsByHBoundSmallerThanTieThreshold"));
-                    avgTotalSplits += Integer.parseInt(committeeInfo.get(j).get(0).get("totalSplits"));
-                }
-            }
-            avgNumNodes /= (committeeSize*booster.size());
-            avgSplitsByConfidence /= (committeeSize*booster.size());
-            avgSplitsByHBound /= (committeeSize*booster.size());
-            avgSplitsByHBoundSmallerThanTieThreshold /= (committeeSize*booster.size());
-            avgTotalSplits /= (committeeSize*booster.size());
+            Measurement[][] m = new Measurement[booster.size()][];
+            IntStream.range(0, booster.size())
+                    .parallel()
+                    .forEach(i -> m[i] = getModelMeasurementsS(booster.get(i)));
 
+            for (int i = 0; i < booster.size(); i++) {
+                avgNumNodes += getMeasurementNamed("avgNumNodes", m[i]).getValue();
+                avgSplitsByConfidence += getMeasurementNamed("avgSplitsByConfidence", m[i]).getValue();
+                avgSplitsByHBound += getMeasurementNamed("avgSplitsByHBound", m[i]).getValue();
+                avgSplitsByHBoundSmallerThanTieThreshold += getMeasurementNamed("avgSplitsByHBoundSmallerThanTieThreshold", m[i]).getValue();
+                avgTotalSplits += getMeasurementNamed("avgTotalSplits", m[i]).getValue();
+            }
+
+            avgNumNodes /= (1.0 * booster.size());
+            avgSplitsByConfidence /= (1.0 * booster.size());
+            avgSplitsByHBound /= (1.0 * booster.size());
+            avgSplitsByHBoundSmallerThanTieThreshold /= (1.0 * booster.size());
+            avgTotalSplits /= (1.0 * booster.size());
         }
 
-        return new Measurement[] {
+        return new Measurement[]{
                 new Measurement("avgNumNodes", avgNumNodes),
                 new Measurement("avgSplitsByConfidence", avgSplitsByConfidence),
                 new Measurement("avgSplitsByHBound", avgSplitsByHBound),
                 new Measurement("avgSplitsByHBoundSmallerThanTieThreshold", avgSplitsByHBoundSmallerThanTieThreshold),
-                new Measurement("avgTotalSplits", avgTotalSplits)
+                new Measurement("avgTotalSplits", avgTotalSplits),
+                new Measurement("skipCount", skipCount)
         };
+    }
+
+    @Override
+    public long measureByteSize() {
+        long b = 0;
+        // get shallow size of this
+        b = VM.current().sizeOf(this);
+        if (booster != null) {
+            long[] byteSize = new long[booster.size()];
+            // get deep size of each item
+            if (booster.size() == 1) {
+                IntStream.range(0, booster.size())
+                        .forEach(i -> byteSize[i] = booster.get(i).measureByteSize());
+            }else{
+                IntStream.range(0, booster.size())
+                        .parallel()
+                        .forEach(i -> byteSize[i] = booster.get(i).measureByteSize());
+//                .forEach(i -> byteSize[i] = GraphLayout.parseInstance(booster.get(i)).totalSize());
+            }
+            for (int i = 0; i < booster.size(); i++) {
+                b += byteSize[i];
+            }
+        }
+        return b;
     }
 
     @Override

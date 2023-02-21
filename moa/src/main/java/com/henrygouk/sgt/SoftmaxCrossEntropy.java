@@ -1,7 +1,6 @@
 package com.henrygouk.sgt;
 
 import java.io.Serializable;
-import java.util.stream.IntStream;
 
 public class SoftmaxCrossEntropy extends Objective implements Serializable {
 
@@ -10,6 +9,7 @@ public class SoftmaxCrossEntropy extends Objective implements Serializable {
     @Override
     public GradHess[] computeDerivatives(double[] groundTruth, double[] raw, boolean computeNegativeResidual, boolean clipPredictions) {
         GradHess[] result = new GradHess[raw.length];
+        super.lossForAllClasses = 0.0;
         double[] predictions = transfer(raw);
 
         for(int i = 0; i < result.length; i++) {
@@ -22,6 +22,7 @@ public class SoftmaxCrossEntropy extends Objective implements Serializable {
             }else{
                 result[i] = new GradHess(groundTruth[i] - predictions[i], predictions[i] * (1.0 - predictions[i]));
             }
+            super.lossForAllClasses +=  -groundTruth[i] * Math.log(predictions[i]);
         }
 
         return result;
