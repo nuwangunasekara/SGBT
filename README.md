@@ -1,4 +1,6 @@
 # Gradient-Boosted-Trees-for-Evolving-Data-Streams
+# Updates
+* We hope to have a SGBT availabe on [MOA main branch] (https://github.com/Waikato/moa) very soon. Kindly get intouch with us, if you like to hear more about it.
 
 # Run MOA experiments
 ## Requirements
