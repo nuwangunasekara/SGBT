@@ -2,7 +2,7 @@
 # Updates
 ## SGBT is now availabe on [MOA main branch] (https://github.com/Waikato/moa).
 
-# Run MOA experiments
+# Run MOA experiments (Based on this fork of MOA)
 ## Requirements
 * [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 ## Datasets
