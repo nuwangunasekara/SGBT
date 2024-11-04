@@ -1,5 +1,6 @@
 # Gradient-Boosted-Trees-for-Evolving-Data-Streams
 # Updates
+## SGBT is also availabe on [CapyMOA] (https://capymoa.org/) python stream learning framework.
 ## SGBT is now availabe on [MOA main branch] (https://github.com/Waikato/moa).
 
 # Run MOA experiments (Based on this fork of MOA)
