@@ -1,7 +1,8 @@
-# Gradient-Boosted-Trees-for-Evolving-Data-Streams
-# Updates
-## SGBT is also availabe on [CapyMOA] (https://capymoa.org/) python stream learning framework.
-## SGBT is now availabe on [MOA main branch] (https://github.com/Waikato/moa).
+# Streaming Gradient Boosted Trees (SGBT)
+- Paper: [Gradient boosted trees for evolving data streams](https://doi.org/10.1007/s10994-024-06517-y) 
+# News
+- SGBT is also availabe on [CapyMOA](https://capymoa.org/), Python stream learning framework.
+- SGBT is now available on [MOA main branch](https://github.com/Waikato/moa), Java stream learning framework.
 
 # Run MOA experiments (Based on this fork of MOA)
 ## Requirements
@@ -53,5 +54,20 @@ Notes:-
 ```<moa_source_root>/moa/src/main/scripts/run_moa.sh``` could be copied to any place and run.
 
 Change ```dataset``` variable in ```run_moa.sh``` to change the data set.
+
+# Cite this work
+```
+@article{gunasekara2024gradient,
+  title={Gradient boosted trees for evolving data streams},
+  author={Gunasekara, Nuwan and Pfahringer, Bernhard and Gomes, Heitor and Bifet, Albert},
+  journal={Machine Learning},
+  volume={113},
+  number={5},
+  pages={3325--3352},
+  year={2024},
+  doi={https://doi.org/10.1007/s10994-024-06517-y}
+  publisher={Springer}
+}
+```
 
 Change ```learners``` variable in ```run_moa.sh``` to change learner command. 
