@@ -3,6 +3,7 @@
 # News
 - SGBT is also availabe on [CapyMOA](https://capymoa.org/), Python stream learning framework.
 - SGBT is now available on [MOA main branch](https://github.com/Waikato/moa), Java stream learning framework.
+- SGBR: SGBT with data stream **regression** support [[paper](https://doi.org/10.1007/s10618-025-01147-x)] [[code](https://github.com/nuwangunasekara/SGBR)]
 
 # Run MOA experiments (Based on this fork of MOA)
 ## Requirements
